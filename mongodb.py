@@ -1,9 +1,12 @@
 from pymongo import MongoClient
+import os
+from dotenv import load_dotenv
 
 
+load_dotenv()
 def connect_to_mongodb():
     # Connection string
-    mongo_uri = "mongodb+srv://volunteer_match:volunteer_match@cluster0.lqx4a.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0"
+    mongo_uri = os.getenv("DATABASE_URL")
     
     try:
         client = MongoClient(mongo_uri)
