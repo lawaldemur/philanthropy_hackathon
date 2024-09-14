@@ -1,10 +1,23 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import Nav from "./Nav";
 
 function Home() {
   const [open, setOpen] = useState(false);
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [posts, setPosts] = useState([]);
+
+  // Fetch posts from the Flask backend
+  useEffect(() => {
+    fetch("http://localhost:8000/get_posts")
+      .then((response) => response.json())
+      .then((data) => {
+        setPosts(data); // Set the response data into the state
+      })
+      .catch((error) => {
+        console.error("Error fetching posts:", error);
+      });
+  }, []); // The empty array ensures this effect runs only once when the component mounts
 
   const increment = () => {};
 
@@ -28,56 +41,58 @@ function Home() {
       <div className="flex flex-col sm:flex-row container mx-auto py-6">
         <div className="w-full sm:w-3/4 flex flex-wrap py-6">
           {/* Main Content Section */}
-          <section className="w-full flex flex-col items-center px-3">
-            <div className="flex flex-col justify-between w-full sm:w-2/3 pl-4">
-              {/* Job Title and Company */}
-            </div>
+          {posts.map((post) => (
+            <section className="w-full flex flex-col items-center px-3">
+              <div className="flex flex-col justify-between w-full sm:w-2/3 pl-4">
+                {/* Job Title and Company */}
+              </div>
 
-            {/* Article 1 */}
-            <article className="flex flex-col shadow my-4">
-              <div className="bg-white flex flex-col justify-start p-6">
-                <a
-                  href="#"
-                  className="text-blue-700 text-sm font-bold uppercase pb-4"
-                >
-                  Technology
-                </a>
-                <a
-                  href="#"
-                  className="text-3xl font-bold hover:text-gray-700 pb-4"
-                >
-                  Lorem Ipsum Dolor Sit Amet
-                </a>
-                <p className="text-sm pb-3">
-                  By{" "}
-                  <a href="#" className="font-semibold hover:text-gray-800">
-                    Author
+              {/* Article 1 */}
+              <article className="flex flex-col shadow my-4">
+                <div className="bg-white flex flex-col justify-start p-6">
+                  <a
+                    href="#"
+                    className="text-blue-700 text-sm font-bold uppercase pb-4"
+                  >
+                    Technology
                   </a>
-                </p>
-                <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
-                <div>
-                  <p className="text-blue-700 font-bold">$46.06 / hr</p>
-                  <p className="text-gray-600 text-sm">
-                    Financial District · 100 Gold St · New York
+                  <a
+                    href="#"
+                    className="text-3xl font-bold hover:text-gray-700 pb-4"
+                  >
+                    {post["title"]}
+                  </a>
+                  <p className="text-sm pb-3">
+                    By{" "}
+                    <a href="#" className="font-semibold hover:text-gray-800">
+                      {post["author_first_name"]} {post["author_last_name"]}
+                    </a>
                   </p>
-                </div>
-                <div className="flex justify-between items-center mt-4">
-                  {/* Badges */}
-                  <div className="flex space-x-2">
-                    <span className="bg-blue-500 text-white text-xs px-2 py-1 rounded-full">
-                      Full-time
-                    </span>
-                    <span className="bg-gray-500 text-white text-xs px-2 py-1 rounded-full">
-                      Government
-                    </span>
-                    <span className="bg-green-500 text-white text-xs px-2 py-1 rounded-full">
-                      7 days ago
-                    </span>
+                  <p>{post["description"]}</p>
+                  <div>
+                    <p className="text-blue-700 font-bold">$46.06 / hr</p>
+                    <p className="text-gray-600 text-sm">
+                      Financial District · 100 Gold St · New York
+                    </p>
+                  </div>
+                  <div className="flex justify-between items-center mt-4">
+                    {/* Badges */}
+                    <div className="flex space-x-2">
+                      <span className="bg-blue-500 text-white text-xs px-2 py-1 rounded-full">
+                        Full-time
+                      </span>
+                      <span className="bg-gray-500 text-white text-xs px-2 py-1 rounded-full">
+                        Government
+                      </span>
+                      <span className="bg-green-500 text-white text-xs px-2 py-1 rounded-full">
+                        7 days ago
+                      </span>
+                    </div>
                   </div>
                 </div>
-              </div>
-            </article>
-          </section>
+              </article>
+            </section>
+          ))}
         </div>
 
         <nav className="w-full py-4 border-t border-b bg-gray-100">

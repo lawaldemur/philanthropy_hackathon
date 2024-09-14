@@ -16,7 +16,10 @@ from authlib.integrations.flask_client import OAuth
 from functools import wraps
 from dotenv import load_dotenv
 
+<<<<<<< HEAD
 # Load environment variables from .env file
+=======
+>>>>>>> 5362735 (Insert db data into the frontend)
 load_dotenv()
 
 app = Flask(__name__, static_folder="../react-app/build", static_url_path="")
@@ -118,6 +121,10 @@ def get_posts():
     
     for post in posts:
         post["_id"] = str(post["_id"])
+
+        author_data = get_user(post["author_id"])
+        post["author_first_name"] = author_data["first_name"]
+        post["author_last_name"] = author_data["last_name"]
 
     return posts
 
