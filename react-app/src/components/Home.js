@@ -14,7 +14,6 @@ function Home() {
   // Handle category click
   const handleCategoryClick = (categoryId) => {
     // Set the clicked category as the selected category
-    console.log('1');
     setSelectedCategoryId(categoryId);
   };
 
@@ -163,7 +162,11 @@ function Home() {
           >
             <div className="w-full container mx-auto flex flex-col sm:flex-row items-center justify-center text-sm font-bold uppercase mt-0 px-6 py-2">
               { categories.map((category) => ( 
-              <a href="#" className="hover:bg-gray-400 rounded py-2 px-4 mx-2" data-id={category["id"]} onClick={() => handleCategoryClick(category["_id"])}>
+              <a href="#"
+              className={`hover:bg-gray-400 rounded py-2 px-4 mx-2 ${
+                selectedCategoryId === category["_id"] ? 'bg-gray-500 text-white' : ''
+              }`}
+              data-id={category["id"]} onClick={() => handleCategoryClick(category["_id"])}>
                 {category["name"]}
               </a>
               ))}
