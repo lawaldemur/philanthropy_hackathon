@@ -94,13 +94,12 @@ function Home() {
       <Nav />
       <header className="w-full container mx-auto">
         <div className="flex flex-col items-center py-12">
-          <a
+          <p
             className="font-bold text-gray-800 uppercase hover:text-gray-700 text-5xl"
-            href="#"
           >
             Volunteer Hub
-          </a>
-          <p className="text-lg text-gray-600">Posts of volunteers in your area</p>
+          </p>
+          <p className="text-lg text-gray-600">Discover volunteers in your area</p>
         </div>
       </header>
 
@@ -111,13 +110,13 @@ function Home() {
         const category = categories.find(category => category["_id"] === post["category_id"]);
 
         return (
-          <section className="w-full flex flex-col items-center px-3" key={post.id}>
+          <section className="w-full flex flex-col items-center px-3 post-section-wrapper" key={post.id}>
             <div className="flex flex-col justify-between w-full sm:w-2/3 pl-4">
               {/* Job Title and Company */}
             </div>
 
             {/* Article */}
-            <article className="flex flex-col shadow my-4" onClick={() => openModal(post)}>
+            <article className="flex flex-col shadow my-4" onClick={() => openModal(post)} style={{ width: '100%' }}>
               <div className="bg-white flex flex-col justify-start p-6">
                 <a href="#" className="text-blue-700 text-sm font-bold uppercase pb-4">
                   {category ? category.name : "Category not found"}
@@ -241,22 +240,7 @@ function Home() {
 
       <footer className="w-full border-t bg-white pb-12">
         <div className="w-full container mx-auto flex flex-col items-center">
-          <div className="flex flex-col md:flex-row text-center md:text-left md:justify-between py-6">
-            <a href="#" className="uppercase px-3">
-              About Us
-            </a>
-            <a href="#" className="uppercase px-3">
-              Privacy Policy
-            </a>
-            <a href="#" className="uppercase px-3">
-              Terms & Conditions
-            </a>
-            <a href="#" className="uppercase px-3">
-              Contact Us
-            </a>
-          </div>
-
-          <div className="uppercase pb-6">&copy; myblog.com</div>
+          <div className="uppercase pb-6 volunteer_hub_footer" style={{ marginTop: '50px' }}>&copy; Volunteer Hub</div>
         </div>
       </footer>
     </div>
