@@ -32,9 +32,9 @@ auth0 = oauth.register(
     'auth0',
     client_id=os.environ['AUTH0_CLIENT_ID'],
     client_secret=os.environ['AUTH0_CLIENT_SECRET'],
-    api_base_url=f'https://{os.environ["AUTH0_DOMAIN"]}',
-    access_token_url=f'https://{os.environ["AUTH0_DOMAIN"]}/oauth/token',
-    authorize_url=f'https://{os.environ["AUTH0_DOMAIN"]}/authorize',
+    api_base_url="https://" + os.environ['AUTH0_DOMAIN'],
+    access_token_url='https://' + os.environ["AUTH0_DOMAIN"] + "/oauth/token",
+    authorize_url='https://' + os.environ["AUTH0_DOMAIN"] + "/authorize",
     client_kwargs={'scope': 'openid profile email'}
 )
 
@@ -50,7 +50,7 @@ def token_required(f):
         token = token.replace('Bearer ', '')
         try:
             json_response = requests.get(
-                f"https://{app.config['AUTH0_DOMAIN']}/userinfo",
+                "https://" + app.config['AUTH0_DOMAIN'] + "/userinfo",
                 headers={"Authorization": f"Bearer {token}"}
             )
             if json_response.status_code != 200:
@@ -68,7 +68,7 @@ def callback_handling():
     code = request.args.get('code')
 
     # 2. Exchange the authorization code for access and ID tokens
-    token_url = f"https://{os.environ["AUTH0_DOMAIN"]}/oauth/token"
+    token_url = "https://" + os.environ['AUTH0_DOMAIN'] + "/oauth/token"
     token_payload = {
         'grant_type': 'authorization_code',
         'client_id': os.environ['AUTH0_CLIENT_ID'],
@@ -100,6 +100,10 @@ def main(path):
 @app.route('/home')
 def about():
     return "This is the about page!"
+
+@app.route("/status")
+def status():
+    return {"status ": "running 💡"}
 
 
 if __name__ == '__main__':
