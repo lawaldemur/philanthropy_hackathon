@@ -231,7 +231,6 @@ def protected_route(payload):
     current_user = payload['sub']  # Auth0 user ID
     return jsonify(logged_in_as=current_user), 200
 
-
 @app.route("/upload_profile_picture", methods=["POST"])
 @jwt_required()
 def upload_profile_picture():
@@ -267,36 +266,35 @@ def update_profile():
 
     data = request.get_json()
 
-    update_fields = {}
+    # Fields allowed to be updated
     allowed_fields = ["first_name", "last_name", "phone_number", "location", "avatar_url", "bio"]
 
-    for field in allowed_fields:
-        if field in data:
-            update_fields[field] = data[field]
+    # Build the update fields dictionary
+    update_fields = {field: data[field] for field in allowed_fields if field in data}
 
     if not update_fields:
         return jsonify({"message": "No valid fields provided for update."}), 400
 
+    # Update the user profile
     db.users.update_one({"auth0_sub": auth0_sub}, {"$set": update_fields})
 
+    # Fetch the updated user data
     updated_user = find_user_by_sub(auth0_sub)
     return jsonify({
         "message": "Profile updated successfully.",
         "user": updated_user
     }), 200
 
-@app.route("/create_post", methods=["POST"])
-def create_post():
 
-    data = request.get_json()
-    auth0_sub = "google-oauth2|114635820434822493105"
-    
-    # Find the user by auth0_sub
-    user = find_user_by_id(auth0_sub)
+@app.route("/create_post/<auth0_sub>", methods=["POST"])
+def create_post(auth0_sub):
+    """
+    Create a new volunteering post for the given auth0_sub.
+    """
+    # Find the user by user_id
+    user = find_user_by_sub(auth0_sub)
     if not user:
         return jsonify({"message": "User not found."}), 404
-
-    user_id = user['id']
 
     data = request.get_json()
 
@@ -315,10 +313,11 @@ def create_post():
     last_post = db.posts.find_one(sort=[("id", -1)])
     new_post_id = last_post['id'] + 1 if last_post else 1
 
+    # Create the new post
     new_post = {
         "id": new_post_id,
         "title": data["title"],
-        "author_id": user_id,
+        "author_id": user["id"],
         "description": data["description"],
         "category_id": data["category_id"],
         "image_url": image_url,
@@ -327,8 +326,10 @@ def create_post():
         "date_created": datetime.utcnow()
     }
 
+    # Insert the post into the database
     db.posts.insert_one(new_post)
 
+    # Format the response
     new_post["_id"] = str(new_post["_id"])
     new_post["category_id"] = str(new_post["category_id"])
 

@@ -9,7 +9,7 @@ import Modal from 'react-modal';
 // Set the app element for accessibility
 Modal.setAppElement('#root');
 
-async function Profile() {
+function Profile() {
   const { user, isAuthenticated, isLoading, getAccessTokenSilently } = useAuth0();
   const [profile, setProfile] = useState(null);
   const [isEditMode, setIsEditMode] = useState(false);
@@ -23,7 +23,7 @@ async function Profile() {
     requirements: ''
   });
   const [categories, setCategories] = useState([]);
-  const auth0_sub = await getAccessTokenSilently();
+  const auth0_sub = user.sub;
 
   // Fetch user profile from backend
   useEffect(() => {
@@ -31,7 +31,7 @@ async function Profile() {
       if (isAuthenticated) {
         try {
           const token = await getAccessTokenSilently();
-          const response = await fetch(`http://localhost:8000/get_user/${user.sub}`, {
+          const response = await fetch(`http://localhost:8000/get_user/${auth0_sub}`, {
             headers: {
               'Authorization': `Bearer ${token}`
             }
@@ -86,7 +86,7 @@ async function Profile() {
     e.preventDefault();
     try {
       const token = await getAccessTokenSilently();
-      const response = await fetch("http://localhost:8000/update_profile", {
+      const response = await fetch(`http://localhost:8000/update_profile/${auth0_sub}`, {
         method: "PUT",
         headers: {
           'Content-Type': 'application/json',
@@ -130,7 +130,7 @@ async function Profile() {
         .map(req => req.trim())
         .filter(req => req !== "");
 
-      const response = await fetch("http://localhost:8000/create_post", {
+      const response = await fetch(`http://localhost:8000/create_post/${auth0_sub}`, {
         method: "POST",
         headers: {
           'Content-Type': 'application/json',
