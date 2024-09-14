@@ -32,9 +32,9 @@ function Home() {
             className="font-bold text-gray-800 uppercase hover:text-gray-700 text-5xl"
             href="#"
           >
-            Minimal Blog
+            Volunteer Hub
           </a>
-          <p className="text-lg text-gray-600">Lorem Ipsum Dolor Sit Amet</p>
+          <p className="text-lg text-gray-600">Posts of volunteers in your area</p>
         </div>
       </header>
 
@@ -140,20 +140,6 @@ function Home() {
       </div>
 
       <footer className="w-full border-t bg-white pb-12">
-        <div className="relative w-full flex items-center md:pb-12">
-          <button
-            className="absolute bg-blue-800 hover:bg-blue-700 text-white text-2xl font-bold hover:shadow rounded-full w-16 h-16 ml-12"
-            onClick={decrement}
-          >
-            &#8592;
-          </button>
-          <button
-            className="absolute right-0 bg-blue-800 hover:bg-blue-700 text-white text-2xl font-bold hover:shadow rounded-full w-16 h-16 mr-12"
-            onClick={increment}
-          >
-            &#8594;
-          </button>
-        </div>
         <div className="w-full container mx-auto flex flex-col items-center">
           <div className="flex flex-col md:flex-row text-center md:text-left md:justify-between py-6">
             <a href="#" className="uppercase px-3">

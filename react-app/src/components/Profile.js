@@ -1,8 +1,11 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import Nav from "./Nav";
+import { useAuth0 } from '@auth0/auth0-react';
 
 function Profile() {
+  const { user, isAuthenticated, isLoading } = useAuth0();
+
   return (
     <main className="app">
       <Nav />
@@ -31,6 +34,7 @@ function Profile() {
             <div className="text-center">
               <h2 className="text-2xl font-bold">Qiming Liu</h2>
               <p className="text-gray-500">annisyfft@gmail.com</p>
+              { isLoading ? <p>Loading...</p> : isAuthenticated ? <p>{user.email}</p> : <p>Not logged in</p> }
             </div>
             <button className="bg-yellow-500 text-brown px-4 py-2 rounded mt-4">
               Edit Profile

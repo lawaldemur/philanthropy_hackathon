@@ -1,7 +1,11 @@
 import React from "react";
 import { Link } from "react-router-dom";
+import { useAuth0 } from "@auth0/auth0-react";
+
 
 function Nav() {
+  const { isAuthenticated } = useAuth0();
+
   return (
     <nav className="w-full py-4 bg-blue-800 shadow">
       <div className="w-full container mx-auto flex flex-wrap items-center justify-between">
@@ -9,14 +13,6 @@ function Nav() {
           <li>
             <Link className="hover:text-gray-200 hover:underline px-4" to="/">
               Home
-            </Link>
-          </li>
-          <li>
-            <Link
-              className="hover:text-gray-200 hover:underline px-4"
-              to="/about"
-            >
-              About
             </Link>
           </li>
         </ul>
@@ -36,8 +32,9 @@ function Nav() {
           </a>
         </div>
 
+        
         <div className="flex items-center space-x-6 text-lg text-white pr-6">
-          <div className="flex gap-3">
+        {isAuthenticated ? <div className="flex gap-3">
             <Link
               to="/login"
               className="bg-white text-blue-800 hover:bg-gray-200 text-sm font-bold py-2 px-4 rounded"
@@ -45,6 +42,7 @@ function Nav() {
               Log In
             </Link>
           </div>
+          :
           <div className="flex items-center">
             <div className="w-10 h-10 bg-yellow-500 rounded-full flex justify-center items-center">
               <Link to="/profile">
@@ -64,6 +62,7 @@ function Nav() {
               </Link>
             </div>
           </div>
+        }
         </div>
       </div>
     </nav>
