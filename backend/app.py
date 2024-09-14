@@ -19,7 +19,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 app = Flask(__name__, static_folder="../react-app/build", static_url_path="")
-CORS(app)
+CORS(app, resources={r"/*": {"origins": "http://localhost:3000"}})
 app.secret_key = os.urandom(24).hex()
 app.config['JWT_SECRET_KEY'] = os.environ['JWT_SECRET_KEY']
 jwt = JWTManager(app)
@@ -90,7 +90,6 @@ def callback_handling():
     return redirect('/')
 
 
-
 # Redirects to built react app
 @token_required
 @app.route("/", defaults={"path": ""})
@@ -114,7 +113,7 @@ def status():
 @app.route("/get_posts")
 def get_posts():
     posts = list(db.posts.find())
-    
+
     for post in posts:
         post["_id"] = str(post["_id"])
 
@@ -151,4 +150,3 @@ def get_user(user_id):
 
 if __name__ == '__main__':
     app.run(debug=True, host="localhost", port=8000)
-
