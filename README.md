@@ -49,3 +49,8 @@ Follow these steps to set up and run the project:
     ```
     flask --app app run
     ```
+
+6. To run the whole thing:
+```bash
+    cd react-app/ && npm i && npm run build && cd .. && python3.12 backend/app.py
+```
