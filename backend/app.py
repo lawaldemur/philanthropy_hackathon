@@ -16,16 +16,12 @@ from authlib.integrations.flask_client import OAuth
 from functools import wraps
 from dotenv import load_dotenv
 
-<<<<<<< HEAD
-# Load environment variables from .env file
-=======
->>>>>>> 5362735 (Insert db data into the frontend)
 load_dotenv()
 
 app = Flask(__name__, static_folder="../react-app/build", static_url_path="")
 CORS(app)
 app.secret_key = os.urandom(24).hex()
-app.config['JWT_SECRET_KEY'] = "779cb7cbeb9fd89e59ab0d72c264c9326fac2954aa7ed90b"
+app.config['JWT_SECRET_KEY'] = os.environ['JWT_SECRET_KEY']
 jwt = JWTManager(app)
 
 # Configure Auth0
@@ -83,7 +79,7 @@ def callback_handling():
         'client_id': os.environ['AUTH0_CLIENT_ID'],
         'client_secret': os.environ['AUTH0_CLIENT_SECRET'],
         'code': code,
-        'redirect_uri': "http://localhost:3000/callback"
+        'redirect_uri': "http://localhost:8000/callback"
     }
 
     token_info = requests.post(token_url, json=token_payload).json()
@@ -91,7 +87,7 @@ def callback_handling():
     # 3. Process the tokens (e.g., store them in session, use ID token for user info)
     session['user'] = token_info
 
-    return redirect('/home')
+    return redirect('/')
 
 
 
