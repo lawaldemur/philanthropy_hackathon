@@ -10,7 +10,7 @@ root.render(
   <Auth0Provider
     domain="dev-1u4qab05mr75h3uz.us.auth0.com"
     clientId="cpllX1gLukRmDKQGflBgNvfJV2cppUR4"
-    redirectUri="http://localhost:5000/callback"
+    redirectUri="http://localhost:8000/callback"
   >
     <App />
   </Auth0Provider>
