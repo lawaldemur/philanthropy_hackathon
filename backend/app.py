@@ -254,11 +254,8 @@ def upload_profile_picture():
     except NoCredentialsError:
         return jsonify({"error": "AWS credentials not available"}), 500
 
-@app.route("/update_profile", methods=["PUT"])
-def update_profile():
-    data = request.get_json()
-    auth0_sub = "google-oauth2|114635820434822493105"
-    
+@app.route("/update_profile/<auth0_sub>", methods=["PUT"])
+def update_profile(auth0_sub):    
     # Find the user by auth0_sub
     user = find_user_by_sub(auth0_sub)
     if not user:
