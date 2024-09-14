@@ -1,16 +1,23 @@
-import logo from './logo.svg';
-import './App.css';
+import React from 'react';
+import { useAuth0 } from '@auth0/auth0-react';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import Home from './components/Home';
+import Login from './components/Login';
 
+const ProtectedRoute = ({ children }) => {
+  const { isAuthenticated } = useAuth0();
+  return isAuthenticated ? children : <Navigate to="/" />;
+};
+
+// App component containing the router
 function App() {
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-          <h1 className="text-3xl font-bold underline">
-            Hello world!
-          </h1>
-      </header>
-    </div>
+    <Router>
+      <Routes>
+        <Route path="/" element={<Login />} />
+        <Route path="/home" element={<ProtectedRoute><Home /></ProtectedRoute>} />
+      </Routes>
+    </Router>
   );
 }
 
