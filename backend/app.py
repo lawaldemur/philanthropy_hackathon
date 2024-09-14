@@ -1,154 +1,77 @@
-from flask import (
-    Flask,
-    request,
-    send_from_directory,
-    session,
-    url_for,
-    redirect,
-    jsonify,
-)
-from flask_jwt_extended import create_access_token, jwt_required, JWTManager
+# app.py
+from flask import Flask, request, send_from_directory, jsonify
+from flask_jwt_extended import JWTManager, jwt_required, get_jwt_identity, create_access_token
 from pymongo import MongoClient
 from flask_cors import CORS
 import os
-import requests
-from authlib.integrations.flask_client import OAuth
-from functools import wraps
 from dotenv import load_dotenv
 
 load_dotenv()
 
 app = Flask(__name__, static_folder="../react-app/build", static_url_path="")
-CORS(app)
+CORS(app)  # Consider configuring CORS more securely in production
 app.secret_key = os.urandom(24).hex()
-app.config['JWT_SECRET_KEY'] = os.environ['JWT_SECRET_KEY']
+app.config['JWT_SECRET_KEY'] = os.environ.get('JWT_SECRET_KEY', 'default_secret_key')  # Use a default for development
 jwt = JWTManager(app)
 
-# Configure Auth0
-app.config['AUTH0_CLIENT_ID'] = os.environ['AUTH0_CLIENT_ID']
-app.config['AUTH0_CLIENT_SECRET'] = os.environ['AUTH0_CLIENT_SECRET']
-app.config['AUTH0_DOMAIN'] = os.environ['AUTH0_DOMAIN']
-
+# Configure MongoDB
 client = MongoClient(os.getenv("DATABASE_URL"))
 db = client.get_database('volunteer_match')
 
-oauth = OAuth(app)
-auth0 = oauth.register(
-    'auth0',
-    client_id=os.environ['AUTH0_CLIENT_ID'],
-    client_secret=os.environ['AUTH0_CLIENT_SECRET'],
-    api_base_url="https://" + os.environ['AUTH0_DOMAIN'],
-    access_token_url='https://' + os.environ["AUTH0_DOMAIN"] + "/oauth/token",
-    authorize_url='https://' + os.environ["AUTH0_DOMAIN"] + "/authorize",
-    client_kwargs={'scope': 'openid profile email'}
-)
-
-# Middleware to validate access token
-def token_required(f):
-    @wraps(f)
-    def decorated(*args, **kwargs):
-        token = request.headers.get('Authorization', None)
-        if token is None:
-            return jsonify({'message': 'Token is missing'}), 401
-
-        # Strip "Bearer " from token if present
-        token = token.replace('Bearer ', '')
-        try:
-            json_response = requests.get(
-                "https://" + app.config['AUTH0_DOMAIN'] + "/userinfo",
-                headers={"Authorization": f"Bearer {token}"}
-            )
-            if json_response.status_code != 200:
-                raise Exception('Token is invalid')
-        except:
-            return jsonify({'message': 'Token is invalid'}), 401
-
-        return f(*args, **kwargs)
-    return decorated
-
-
-@app.route('/callback')
-def callback_handling():
-    # 1. Get the authorization code from the URL
-    code = request.args.get('code')
-
-    # 2. Exchange the authorization code for access and ID tokens
-    token_url = "https://" + os.environ['AUTH0_DOMAIN'] + "/oauth/token"
-    token_payload = {
-        'grant_type': 'authorization_code',
-        'client_id': os.environ['AUTH0_CLIENT_ID'],
-        'client_secret': os.environ['AUTH0_CLIENT_SECRET'],
-        'code': code,
-        'redirect_uri': "http://localhost:8000/callback"
-    }
-
-    token_info = requests.post(token_url, json=token_payload).json()
-
-    # 3. Process the tokens (e.g., store them in session, use ID token for user info)
-    session['user'] = token_info
-
-    return redirect('/')
-
-
-
-# Redirects to built react app
-@token_required
-@app.route("/", defaults={"path": ""})
-@app.route("/<path:path>")
-def main(path):
-    if path != "" and os.path.exists(app.static_folder + "/" + path):
-        return send_from_directory(app.static_folder, path)
-    return send_from_directory(app.static_folder, "index.html")
-
-
-@token_required
-@app.route('/home')
-def about():
-    return "This is the about page!"
-
+# Public Routes
 @app.route("/status")
 def status():
-    return {"status ": "running 💡"}
+    return {"status": "running 💡"}, 200
 
-
-@app.route("/get_posts")
+@app.route("/get_posts", methods=["GET"])
 def get_posts():
     posts = list(db.posts.find())
-    
     for post in posts:
         post["_id"] = str(post["_id"])
+        author_data = get_user(post.get("author_id"))
+        if author_data:
+            post["author_first_name"] = author_data.get("first_name", "")
+            post["author_last_name"] = author_data.get("last_name", "")
+    return jsonify(posts), 200
 
-        author_data = get_user(post["author_id"])
-        post["author_first_name"] = author_data["first_name"]
-        post["author_last_name"] = author_data["last_name"]
-
-    return posts
-
-
-@app.route("/get_post/<post_id>")
+@app.route("/get_post/<post_id>", methods=["GET"])
 def get_post(post_id):
     post = db.posts.find_one({"id": int(post_id)})
-    post["_id"] = str(post["_id"])
-    return post
+    if post:
+        post["_id"] = str(post["_id"])
+        return jsonify(post), 200
+    return jsonify({"error": "Post not found"}), 404
 
-
-@app.route("/get_users")
+@app.route("/get_users", methods=["GET"])
 def get_users():
     users = list(db.users.find())
-
     for user in users:
         user["_id"] = str(user["_id"])
+    return jsonify(users), 200
 
-    return users
-
-
-@app.route("/get_user/<user_id>")
+@app.route("/get_user/<user_id>", methods=["GET"])
 def get_user(user_id):
     user = db.users.find_one({"id": int(user_id)})
-    user["_id"] = str(user["_id"])
-    return user
+    if user:
+        user["_id"] = str(user["_id"])
+        return user
+    return None
 
+# Protected Routes
+@app.route("/protected", methods=["GET"])
+@jwt_required()
+def protected():
+    current_user = get_jwt_identity()
+    return jsonify(logged_in_as=current_user), 200
+
+# Serving React App
+@app.route('/', defaults={"path": ""})
+@app.route("/<path:path>")
+def serve_react_app(path):
+    if path and os.path.exists(os.path.join(app.static_folder, path)):
+        return send_from_directory(app.static_folder, path)
+    else:
+        return send_from_directory(app.static_folder, "index.html")
 
 if __name__ == '__main__':
     app.run(debug=True, host="localhost", port=8000)
-

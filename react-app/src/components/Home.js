@@ -1,23 +1,35 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import Nav from "./Nav";
+import { useAuth0 } from "@auth0/auth0-react";
 
 function Home() {
   const [open, setOpen] = useState(false);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [posts, setPosts] = useState([]);
+  const { getAccessTokenSilently, isAuthenticated } = useAuth0();
 
-  // Fetch posts from the Flask backend
   useEffect(() => {
-    fetch("http://localhost:8000/get_posts")
-      .then((response) => response.json())
-      .then((data) => {
-        setPosts(data); // Set the response data into the state
-      })
-      .catch((error) => {
+    const fetchPosts = async () => {
+      try {
+        let url = "http://localhost:8000/get_posts";
+        let headers = {};
+
+        if (isAuthenticated) {
+          const token = await getAccessTokenSilently();
+          headers.Authorization = `Bearer ${token}`;
+        }
+
+        const response = await fetch(url, { headers });
+        const data = await response.json();
+        setPosts(data);
+      } catch (error) {
         console.error("Error fetching posts:", error);
-      });
-  }, []); // The empty array ensures this effect runs only once when the component mounts
+      }
+    };
+
+    fetchPosts();
+  }, [getAccessTokenSilently, isAuthenticated]);
 
   const increment = () => {};
 
