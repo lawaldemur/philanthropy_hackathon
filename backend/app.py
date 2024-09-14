@@ -16,7 +16,7 @@ from functools import wraps
 
 from mongodb import connect_to_mongodb
 
-app = Flask(__name__, static_folder="./react-app/build", static_url_path="")
+app = Flask(__name__, static_folder="../react-app/build", static_url_path="")
 CORS(app)
 app.secret_key = os.urandom(24).hex()
 app.config['JWT_SECRET_KEY'] = "779cb7cbeb9fd89e59ab0d72c264c9326fac2954aa7ed90b"
@@ -107,5 +107,5 @@ def status():
 
 
 if __name__ == '__main__':
-    app.run(debug=True, host="localhost")
+    app.run(debug=True, host="localhost",port=8000)
 
