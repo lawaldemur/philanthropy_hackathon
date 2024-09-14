@@ -28,17 +28,26 @@ def get_posts():
     posts = list(db.posts.find())
     for post in posts:
         post["_id"] = str(post["_id"])
+        post["category_id"] = str(post["category_id"])
         author_data = get_user(post.get("author_id"))
         if author_data:
             post["author_first_name"] = author_data.get("first_name", "")
             post["author_last_name"] = author_data.get("last_name", "")
     return jsonify(posts), 200
 
+@app.route("/get_categories", methods=["GET"])
+def get_categories():
+    categories = list(db.categories.find())
+    for category in categories:
+        category["_id"] = str(category["_id"])
+    return jsonify(categories), 200
+
 @app.route("/get_post/<post_id>", methods=["GET"])
 def get_post(post_id):
     post = db.posts.find_one({"id": int(post_id)})
     if post:
         post["_id"] = str(post["_id"])
+        post["category_id"] = str(post["category_id"])
         return jsonify(post), 200
     return jsonify({"error": "Post not found"}), 404
 
