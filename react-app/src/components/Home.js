@@ -7,6 +7,7 @@ function Home() {
   const [open, setOpen] = useState(false);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [posts, setPosts] = useState([]);
+  const [categories, setCategories] = useState([]);
   const { getAccessTokenSilently, isAuthenticated } = useAuth0();
 
   useEffect(() => {
@@ -31,6 +32,28 @@ function Home() {
     fetchPosts();
   }, [getAccessTokenSilently, isAuthenticated]);
 
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        let url = "http://localhost:8000/get_categories";
+        let headers = {};
+
+        if (isAuthenticated) {
+          const token = await getAccessTokenSilently();
+          headers.Authorization = `Bearer ${token}`;
+        }
+
+        const response = await fetch(url, { headers });
+        const data = await response.json();
+        setCategories(data);
+      } catch (error) {
+        console.error("Error fetching posts:", error);
+      }
+    };
+
+    fetchCategories();
+  }, [getAccessTokenSilently, isAuthenticated]);
+
   const increment = () => {};
 
   const decrement = () => {};
@@ -53,58 +76,57 @@ function Home() {
       <div className="flex flex-col sm:flex-row container mx-auto py-6">
         <div className="w-full sm:w-3/4 flex flex-wrap py-6">
           {/* Main Content Section */}
-          {posts.map((post) => (
-            <section className="w-full flex flex-col items-center px-3">
-              <div className="flex flex-col justify-between w-full sm:w-2/3 pl-4">
-                {/* Job Title and Company */}
-              </div>
+          {posts.map((post) => {
+            const category = categories.find(category => category["_id"] === post["category_id"]);
 
-              {/* Article 1 */}
-              <article className="flex flex-col shadow my-4">
-                <div className="bg-white flex flex-col justify-start p-6">
-                  <a
-                    href="#"
-                    className="text-blue-700 text-sm font-bold uppercase pb-4"
-                  >
-                    Technology
-                  </a>
-                  <a
-                    href="#"
-                    className="text-3xl font-bold hover:text-gray-700 pb-4"
-                  >
-                    {post["title"]}
-                  </a>
-                  <p className="text-sm pb-3">
-                    By{" "}
-                    <a href="#" className="font-semibold hover:text-gray-800">
-                      {post["author_first_name"]} {post["author_last_name"]}
+            return (
+              <section className="w-full flex flex-col items-center px-3" key={post.id}>
+                <div className="flex flex-col justify-between w-full sm:w-2/3 pl-4">
+                  {/* Job Title and Company */}
+                </div>
+
+                {/* Article 1 */}
+                <article className="flex flex-col shadow my-4">
+                  <div className="bg-white flex flex-col justify-start p-6">
+                    <a href="#" className="text-blue-700 text-sm font-bold uppercase pb-4">
+                      {category ? category.name : "-"}
                     </a>
-                  </p>
-                  <p>{post["description"]}</p>
-                  <div>
-                    <p className="text-blue-700 font-bold">$46.06 / hr</p>
-                    <p className="text-gray-600 text-sm">
-                      Financial District · 100 Gold St · New York
+                    <a href="#" className="text-3xl font-bold hover:text-gray-700 pb-4">
+                      {post["title"]}
+                    </a>
+                    <p className="text-sm pb-3">
+                      By{" "}
+                      <a href="#" className="font-semibold hover:text-gray-800">
+                        {post["author_first_name"]} {post["author_last_name"]}
+                      </a>
                     </p>
-                  </div>
-                  <div className="flex justify-between items-center mt-4">
-                    {/* Badges */}
-                    <div className="flex space-x-2">
-                      <span className="bg-blue-500 text-white text-xs px-2 py-1 rounded-full">
-                        Full-time
-                      </span>
-                      <span className="bg-gray-500 text-white text-xs px-2 py-1 rounded-full">
-                        Government
-                      </span>
-                      <span className="bg-green-500 text-white text-xs px-2 py-1 rounded-full">
-                        7 days ago
-                      </span>
+                    <p>{post["description"]}</p>
+                    <div>
+                      <p className="text-blue-700 font-bold">$46.06 / hr</p>
+                      <p className="text-gray-600 text-sm">
+                        Financial District · 100 Gold St · New York
+                      </p>
+                    </div>
+                    <div className="flex justify-between items-center mt-4">
+                      {/* Badges */}
+                      <div className="flex space-x-2">
+                        <span className="bg-blue-500 text-white text-xs px-2 py-1 rounded-full">
+                          Full-time
+                        </span>
+                        <span className="bg-gray-500 text-white text-xs px-2 py-1 rounded-full">
+                          Government
+                        </span>
+                        <span className="bg-green-500 text-white text-xs px-2 py-1 rounded-full">
+                          7 days ago
+                        </span>
+                      </div>
                     </div>
                   </div>
-                </div>
-              </article>
-            </section>
-          ))}
+                </article>
+              </section>
+            );
+          })}
+
         </div>
 
         <nav className="w-full py-4 border-t border-b bg-gray-100">
@@ -128,24 +150,11 @@ function Home() {
             }`}
           >
             <div className="w-full container mx-auto flex flex-col sm:flex-row items-center justify-center text-sm font-bold uppercase mt-0 px-6 py-2">
-              <a href="#" className="hover:bg-gray-400 rounded py-2 px-4 mx-2">
-                Technology
+              { categories.map((category) => ( 
+              <a href="#" className="hover:bg-gray-400 rounded py-2 px-4 mx-2" data-id={category["id"]}>
+                {category["name"]}
               </a>
-              <a href="#" className="hover:bg-gray-400 rounded py-2 px-4 mx-2">
-                Automotive
-              </a>
-              <a href="#" className="hover:bg-gray-400 rounded py-2 px-4 mx-2">
-                Finance
-              </a>
-              <a href="#" className="hover:bg-gray-400 rounded py-2 px-4 mx-2">
-                Politics
-              </a>
-              <a href="#" className="hover:bg-gray-400 rounded py-2 px-4 mx-2">
-                Culture
-              </a>
-              <a href="#" className="hover:bg-gray-400 rounded py-2 px-4 mx-2">
-                Sports
-              </a>
+              ))}
             </div>
           </div>
         </nav>
