@@ -14,12 +14,13 @@ import requests
 from authlib.integrations.flask_client import OAuth
 from functools import wraps
 
-from mongodb import connect_to_mongodb
+from mongodb import *
+
 
 app = Flask(__name__, static_folder="../react-app/build", static_url_path="")
 CORS(app)
 app.secret_key = os.urandom(24).hex()
-app.config['JWT_SECRET_KEY'] = "779cb7cbeb9fd89e59ab0d72c264c9326fac2954aa7ed90b"
+app.config['JWT_SECRET_KEY'] = os.environ['JWT_SECRET_KEY']
 jwt = JWTManager(app)
 
 # Configure Auth0
@@ -107,5 +108,5 @@ def status():
 
 
 if __name__ == '__main__':
-    app.run(debug=True, host="localhost",port=8000)
+    app.run(debug=True, host="localhost", port=8000)
 
