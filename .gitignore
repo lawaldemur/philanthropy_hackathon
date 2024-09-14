@@ -1,0 +1,8 @@
+venv/
+**/~$*
+data/**/*
+reports/**/*
+downloads/**/*
+__pycache__/
+.vscode/
+.env
