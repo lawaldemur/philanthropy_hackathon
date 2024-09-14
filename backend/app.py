@@ -5,6 +5,10 @@ from pymongo import MongoClient
 from flask_cors import CORS
 import os
 from dotenv import load_dotenv
+import boto3
+from botocore.exceptions import NoCredentialsError
+
+
 
 load_dotenv()
 
@@ -17,6 +21,14 @@ jwt = JWTManager(app)
 # Configure MongoDB
 client = MongoClient(os.getenv("DATABASE_URL"))
 db = client.get_database('volunteer_match')
+
+# Configure AWS S3
+S3_BUCKET = os.getenv("S3_BUCKET")
+S3_KEY = os.getenv("S3_KEY")
+S3_SECRET = os.getenv("S3_SECRET")
+
+s3 = boto3.client('s3', aws_access_key_id=S3_KEY, aws_secret_access_key=S3_SECRET)
+
 
 # Public Routes
 @app.route("/status")
@@ -72,6 +84,29 @@ def get_user(user_id):
 def protected():
     current_user = get_jwt_identity()
     return jsonify(logged_in_as=current_user), 200
+
+@app.route("/upload_profile_picture", methods=["POST"])
+@jwt_required()
+def upload_profile_picture():
+    user_id = get_jwt_identity()
+    
+    if 'file' not in request.files:
+        return jsonify({"error": "No file uploaded"}), 400
+
+    file = request.files['file']
+    file_name = f"user_{user_id}_{file.filename}"
+
+    try:
+        s3.upload_fileobj(file, S3_BUCKET, file_name, ExtraArgs={'ACL': 'public-read', 'ContentType': file.content_type})
+        image_url = f"https://{S3_BUCKET}.s3.amazonaws.com/{file_name}"
+        
+        # Update the user's profile picture URL in the database
+        db.users.update_one({"id": int(user_id)}, {"$set": {"profile_picture": image_url}})
+
+        return jsonify({"image_url": image_url}), 200
+
+    except NoCredentialsError:
+        return jsonify({"error": "AWS credentials not available"}), 500
 
 # Serving React App
 @app.route('/', defaults={"path": ""})

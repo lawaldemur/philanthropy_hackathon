@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import Nav from "./Nav";
 import { useAuth0 } from '@auth0/auth0-react';
 
+
 function Profile() {
   const { user, isAuthenticated, isLoading } = useAuth0();
 
