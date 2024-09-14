@@ -24,6 +24,7 @@ function Home() {
       // Set the clicked category as the selected category
       setSelectedCategoryId(categoryId);
     }
+
   };
 
   const filteredPosts = selectedCategoryId
@@ -222,12 +223,14 @@ function Home() {
               { categories.map((category) => ( 
               <a href="#"
               className={`hover:bg-gray-400 rounded py-2 px-4 mx-2 ${
+
                 selectedCategoryId === category["_id"]
                   ? "bg-gray-400 text-gray-600"
                   : ""
               }`}
               data-id={category["id"]}
               onClick={() => handleCategoryClick(category["_id"])}>
+
                 {category["name"]}
               </a>
               ))}
