@@ -1,8 +1,14 @@
-import React from 'react';
-import { useAuth0 } from '@auth0/auth0-react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import Home from './components/Home';
-import Login from './components/Login';
+import React from "react";
+import { useAuth0 } from "@auth0/auth0-react";
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  Navigate,
+} from "react-router-dom";
+import Home from "./components/Home";
+import Login from "./components/Login";
+import Profile from "./components/Profile";
 
 const ProtectedRoute = ({ children }) => {
   const { isAuthenticated } = useAuth0();
@@ -14,8 +20,16 @@ function App() {
   return (
     <Router>
       <Routes>
-        <Route path="/" element={<Login />} />
-        <Route path="/home" element={<ProtectedRoute><Home /></ProtectedRoute>} />
+        <Route path="/login" element={<Login />} />
+        <Route
+          path="/"
+          element={
+            // <ProtectedRoute>
+            <Home />
+            // </ProtectedRoute>
+          }
+        />
+        <Route path="/profile" element={<Profile />} />
       </Routes>
     </Router>
   );
