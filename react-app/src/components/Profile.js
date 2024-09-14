@@ -5,6 +5,7 @@ import Nav from "./Nav";
 import { useAuth0 } from '@auth0/auth0-react';
 import Modal from 'react-modal';
 
+
 // Set the app element for accessibility
 Modal.setAppElement('#root');
 
