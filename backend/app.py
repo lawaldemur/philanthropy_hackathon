@@ -66,7 +66,7 @@ def token_required(f):
 def callback_handling():
     # 1. Get the authorization code from the URL
     code = request.args.get('code')
-    
+
     # 2. Exchange the authorization code for access and ID tokens
     token_url = f"https://{os.environ["AUTH0_DOMAIN"]}/oauth/token"
     token_payload = {
@@ -76,12 +76,12 @@ def callback_handling():
         'code': code,
         'redirect_uri': "http://localhost:3000/callback"
     }
-    
+
     token_info = requests.post(token_url, json=token_payload).json()
-    
+
     # 3. Process the tokens (e.g., store them in session, use ID token for user info)
     session['user'] = token_info
-    
+
     return redirect('/home')
 
 
@@ -104,4 +104,4 @@ def about():
 
 if __name__ == '__main__':
     app.run(debug=True, host="localhost")
-    
+

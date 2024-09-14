@@ -1,7 +1,7 @@
 # Launch instructions
 
 Follow these steps to set up and run the project:
-
+# Move to the backend
 1. Create a virtual environment:
 
     - **MacOS and Linux:**
@@ -45,4 +45,7 @@ Follow these steps to set up and run the project:
 5. To run the server:
     ```bash
     python ./app.py
+    ```
+    ```
+    flask --app app run
     ```
