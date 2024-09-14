@@ -8,25 +8,27 @@ from flask import (
     jsonify,
 )
 from flask_jwt_extended import create_access_token, jwt_required, JWTManager
+from pymongo import MongoClient
 from flask_cors import CORS
 import os
 import requests
 from authlib.integrations.flask_client import OAuth
 from functools import wraps
 
-from mongodb import *
-
 
 app = Flask(__name__, static_folder="../react-app/build", static_url_path="")
 CORS(app)
 app.secret_key = os.urandom(24).hex()
-app.config['JWT_SECRET_KEY'] = os.environ['JWT_SECRET_KEY']
+app.config['JWT_SECRET_KEY'] = "779cb7cbeb9fd89e59ab0d72c264c9326fac2954aa7ed90b"
 jwt = JWTManager(app)
 
 # Configure Auth0
 app.config['AUTH0_CLIENT_ID'] = os.environ['AUTH0_CLIENT_ID']
 app.config['AUTH0_CLIENT_SECRET'] = os.environ['AUTH0_CLIENT_SECRET']
 app.config['AUTH0_DOMAIN'] = os.environ['AUTH0_DOMAIN']
+
+client = MongoClient(os.getenv("DATABASE_URL"))
+db = client.get_database('volunteer_match')
 
 oauth = OAuth(app)
 auth0 = oauth.register(
@@ -105,6 +107,40 @@ def about():
 @app.route("/status")
 def status():
     return {"status ": "running 💡"}
+
+
+@app.route("/get_posts")
+def get_posts():
+    posts = list(db.posts.find())
+    
+    for post in posts:
+        post["_id"] = str(post["_id"])
+
+    return posts
+
+
+@app.route("/get_post/<post_id>")
+def get_post(post_id):
+    post = db.posts.find_one({"id": int(post_id)})
+    post["_id"] = str(post["_id"])
+    return post
+
+
+@app.route("/get_users")
+def get_users():
+    users = list(db.users.find())
+
+    for user in users:
+        user["_id"] = str(user["_id"])
+
+    return users
+
+
+@app.route("/get_user/<user_id>")
+def get_user(user_id):
+    user = db.users.find_one({"id": int(user_id)})
+    user["_id"] = str(user["_id"])
+    return user
 
 
 if __name__ == '__main__':
