@@ -2,7 +2,6 @@ import React, { useEffect, useState } from "react";
 import axios from 'axios';
 import Modal from "./Modal";
 import Nav from "./Nav";
-import { useAuth0 } from "@auth0/auth0-react";
 import ProfilePictureUpload from "./ProfilePictureUpload";
 import MapComponent from "./MapComponent";
 
@@ -15,8 +14,6 @@ function Home() {
   const [selectedPost, setSelectedPost] = useState(null);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [userData, setUserData] = useState(null);
-
-  const { getAccessTokenSilently, isAuthenticated } = useAuth0();
 
   const handleCategoryClick = (categoryId) => {
     setSelectedCategoryId(
@@ -48,10 +45,7 @@ function Home() {
         let url = "http://localhost:8000/get_posts";
         let headers = {};
 
-        if (isAuthenticated) {
-          const token = await getAccessTokenSilently();
-          headers.Authorization = `Bearer ${token}`;
-        }
+        
 
         const response = await fetch(url, { headers });
         const data = await response.json();
@@ -63,7 +57,7 @@ function Home() {
     };
 
     fetchPosts();
-  }, [getAccessTokenSilently, isAuthenticated]);
+  },[]);
 
   useEffect(() => {
     const fetchCategories = async () => {
@@ -71,10 +65,7 @@ function Home() {
         let url = "http://localhost:8000/get_categories";
         let headers = {};
 
-        if (isAuthenticated) {
-          const token = await getAccessTokenSilently();
-          headers.Authorization = `Bearer ${token}`;
-        }
+      
 
         const response = await fetch(url, { headers });
         const data = await response.json();
@@ -85,7 +76,7 @@ function Home() {
     };
 
     fetchCategories();
-  }, [getAccessTokenSilently, isAuthenticated]);
+  }, []);
 
   const openModal = (post) => {
     setSelectedPost(post);
@@ -97,24 +88,23 @@ function Home() {
   };
 
   return (
-    <div className="relative h-screen flex overflow-hidden">
-
-        <div className="w-full sm:w-1/2 h-full overflow-y-auto bg-white bg-opacity-90 z-10">
-          <Nav isLoggedIn={isLoggedIn} userData={userData} />
-          <ProfilePictureUpload userData={userData} />
-          <header
-            className="w-full container mx-auto"
-            style={{
-          backgroundImage:
-            'url("https://images.unsplash.com/photo-1565803974275-dccd2f933cbb")',
-          backgroundSize: "cover",
-          backgroundRepeat: "no-repeat",
-          backgroundPosition: "center",
-          height: "400px",
-            }}
-          >
-            <div className="flex flex-col items-center py-12">
-            <p className="font-black text-white uppercase text-5xl">
+    <div className="relative flex flex-col min-h-screen">
+      <div className="bg-white bg-opacity-90">
+        <Nav isLoggedIn={isLoggedIn} userData={userData} />
+        <ProfilePictureUpload userData={userData} />
+        <header
+          className="w-full container mx-auto"
+          style={{
+            backgroundImage:
+              'url("https://images.unsplash.com/photo-1565803974275-dccd2f933cbb")',
+            backgroundSize: "cover",
+            backgroundRepeat: "no-repeat",
+            backgroundPosition: "center",
+            height: "400px",
+          }}
+        >
+          <div className="flex flex-col items-center justify-center h-full">
+            <p className="font-black text-white uppercase text-5xl mb-2">
               Volunteer Hub
             </p>
             <p className="text-lg text-white">
@@ -123,82 +113,76 @@ function Home() {
           </div>
         </header>
 
-        {/* Categories Section */}
-        <nav className="w-full py-4 border-t border-b bg-gray-100">
-          <div className="block sm:hidden">
-            <button
-              className="block md:hidden text-base font-bold uppercase text-center flex justify-center items-center"
-              onClick={() => setOpen(!open)}
-            >
-              Topics{" "}
-              <i
-                className={`fas ml-2 ${
-                  open ? "fa-chevron-down" : "fa-chevron-up"
-                }`}
-              ></i>
-            </button>
-          </div>
-          <div
-            className={`w-full flex-grow sm:flex sm:items-center sm:w-auto ${
-              open ? "block" : "hidden"
-            }`}
-          >
-            <div className="w-full container mx-auto flex flex-col sm:flex-row items-center justify-center text-sm font-bold uppercase mt-0 px-6 py-2">
-              {categories.map((category) => (
+        <div className="flex flex-col md:flex-row mx-auto px-4 py-8">
+          <div className="w-full md:w-2/3 pr-0 md:pr-8 mb-8 md:mb-0">
+            <nav className="w-full py-4 border-t border-b bg-gray-100 mb-8">
+              <div className="block sm:hidden">
                 <button
-                  key={category["_id"]}
-                  className={`hover:bg-gray-400 rounded py-2 px-4 mx-2 ${
-                    selectedCategoryId === category["_id"]
-                      ? "bg-gray-500 text-white"
-                      : ""
-                  }`}
-                  onClick={() => handleCategoryClick(category["_id"])}
+                  className="block md:hidden text-base font-bold uppercase text-center flex justify-center items-center w-full"
+                  onClick={() => setOpen(!open)}
                 >
-                  {category["name"]}
+                  Topics{" "}
+                  <i
+                    className={`fas ml-2 ${
+                      open ? "fa-chevron-down" : "fa-chevron-up"
+                    }`}
+                  ></i>
                 </button>
-              ))}
-            </div>
-          </div>
-        </nav>
-
-        <div className="px-6 py-4">
-          {filteredPosts.map((post, index) => {
-            const category = categories.find(
-              (category) => category["_id"] === post["category_id"]
-            );
-            // console.log(post);
-            // console.log("HELLO");
-            return (
-              <section
-                className="w-full flex flex-col items-center px-3 post-section-wrapper"
-                key={post.id || index}
+              </div>
+              <div
+                className={`w-full flex-grow sm:flex sm:items-center sm:w-auto ${
+                  open ? "block" : "hidden sm:flex"
+                }`}
               >
-                <article
-                  className="flex  flex-col shadow my-4"
-                  onClick={() => openModal(post)}
-                  style={{ width: "100%" }}
-                >
-                  <div className="bg-white flex flex-col justify-start p-6">
-                    <span className="text-blue-700 text-sm font-bold uppercase pb-4">
-                      {category ? category.name : "Category not found"}
-                    </span>
-                    <span className="text-3xl font-bold hover:text-gray-700 pb-4">
-                      {post.title}
-                    </span>
-                    <p className="text-sm pb-3">
-                      By{" "}
-                      <span className="font-semibold hover:text-gray-800">
-                        {post.author_first_name} {post.author_last_name}
+                <div className="w-full container mx-auto flex flex-wrap justify-center text-sm font-bold uppercase mt-0 px-6 py-2">
+                  {categories.map((category) => (
+                    <button
+                      key={category["_id"]}
+                      className={`hover:bg-gray-400 rounded py-2 px-4 mx-2 mb-2 ${
+                        selectedCategoryId === category["_id"]
+                          ? "bg-gray-500 text-white"
+                          : ""
+                      }`}
+                      onClick={() => handleCategoryClick(category["_id"])}
+                    >
+                      {category["name"]}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </nav>
+
+            <div className="space-y-8">
+              {filteredPosts.map((post, index) => {
+                const category = categories.find(
+                  (category) => category["_id"] === post["category_id"]
+                );
+                return (
+                  <article
+                    key={post.id || index}
+                    className="flex flex-col shadow my-4 w-full cursor-pointer"
+                    onClick={() => openModal(post)}
+                  >
+                    <div className="bg-white flex flex-col justify-start p-6">
+                      <span className="text-blue-700 text-sm font-bold uppercase pb-4">
+                        {category ? category.name : "Category not found"}
                       </span>
-                    </p>
-                    <p>{post.description}</p>
-                    <div>
-                      <p className="text-gray-600 text-sm">
-                        Financial District · 100 Gold St · New York
+                      <span className="text-3xl font-bold hover:text-gray-700 pb-4">
+                        {post.title}
+                      </span>
+                      <p className="text-sm pb-3">
+                        By{" "}
+                        <span className="font-semibold hover:text-gray-800">
+                          {post.author_first_name} {post.author_last_name}
+                        </span>
                       </p>
-                    </div>
-                    <div className="flex justify-between items-center mt-4">
-                      <div className="flex space-x-2">
+                      <p className="pb-6">{post.description}</p>
+                      <div>
+                        <p className="text-gray-600 text-sm">
+                          Financial District · 100 Gold St · New York
+                        </p>
+                      </div>
+                      <div className="flex flex-wrap gap-2 mt-4">
                         <span className="bg-blue-500 text-white text-xs px-2 py-1 rounded-full">
                           Full-time
                         </span>
@@ -210,20 +194,22 @@ function Home() {
                         </span>
                       </div>
                     </div>
-                  </div>
-                </article>
-              </section>
-            );
-          })}
-          {isModalOpen && (
-            <Modal selectedPost={selectedPost} closeModal={closeModal} />
-          )}
+                  </article>
+                );
+              })}
+            </div>
+          </div>
+          
+          <div className="w-full md:w-1/3">
+            <div className="aspect-square">
+              <MapComponent posts={filteredPosts} />
+            </div>
+          </div>
         </div>
-      </div>
 
-      {/* Map Section */}
-      <div className="w-full sm:w-1/2 h-full fixed right-0 top-0">
-        <MapComponent />
+        {isModalOpen && (
+          <Modal selectedPost={selectedPost} closeModal={closeModal} />
+        )}
       </div>
     </div>
   );
