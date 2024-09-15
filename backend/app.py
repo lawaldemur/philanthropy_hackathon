@@ -15,11 +15,19 @@ import json
 from urllib.parse import urlencode
 from datetime import datetime
 import requests
+import datetime
 
 load_dotenv()
 
 app = Flask(__name__, static_folder="../react-app/build", static_url_path="")
-CORS(app, resources={r"/*": {"origins": "http://localhost:3000"}})
+
+app.config["SESSION_COOKIE_SAMESITE"] = "None"
+app.config["SESSION_COOKIE_SECURE"] = True
+app.config["SESSION_PERMANENT"] = True
+app.config["SESSION_TYPE"] = "filesystem"
+app.config['PERMANENT_SESSION_LIFETIME'] = datetime.timedelta(hours=5)
+
+CORS(app, resources={r"/*": {"origins": "http://localhost:3000"}}, supports_credentials=True)
 app.secret_key = os.urandom(24).hex()
 app.config['JWT_SECRET_KEY'] = os.environ.get('JWT_SECRET_KEY', 'default_secret_key')
 app.config['JWT_ALGORITHM'] = 'RS256'
