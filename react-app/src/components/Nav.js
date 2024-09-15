@@ -1,20 +1,22 @@
 // ./react-app/src/components/Nav.js
 import React from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { useAuth0 } from "@auth0/auth0-react";
 
 function Nav() {
   const { isAuthenticated, logout } = useAuth0();
+  const location = useLocation();
 
   return (
     <nav className="w-full py-4 bg-blue-800 shadow">
       <div className="w-full container mx-auto flex flex-wrap items-center justify-between">
         <ul className="flex items-center justify-between font-bold text-sm text-white uppercase no-underline">
-          <li>
+          {location.pathname !== '/' && (<li>
             <Link className="hover:text-gray-200 hover:underline px-4" to="/">
               Home
             </Link>
           </li>
+          )}
         </ul>
 
         <div className="flex items-center text-lg no-underline text-white pr-6">

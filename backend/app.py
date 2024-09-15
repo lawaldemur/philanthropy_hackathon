@@ -12,12 +12,13 @@ from functools import wraps
 from urllib.request import urlopen
 import json
 from datetime import datetime
+import requests
 
 
 load_dotenv()
 
 app = Flask(__name__, static_folder="../react-app/build", static_url_path="")
-CORS(app, resources={r"/*": {"origins": "http://localhost:3000"}})  # Adjust origins as needed
+CORS(app, resources={r"/*": {"origins": "http://localhost:3000"}})
 app.secret_key = os.urandom(24).hex()
 app.config['JWT_SECRET_KEY'] = os.environ.get('JWT_SECRET_KEY', 'default_secret_key')
 app.config['JWT_ALGORITHM'] = 'RS256'
@@ -222,7 +223,43 @@ def get_user_route(auth0_sub):
     user = find_user_by_sub(auth0_sub)
     if user:
         return jsonify(user), 200
+    
+    print(auth0_sub)
+    
+    # create a new user
+    response = requests.get(f"https://{os.environ.get('AUTH0_DOMAIN')}/api/v2/users/{auth0_sub}", headers={
+        'Authorization': f"Bearer {get_auth0_token()}"
+    })
+    data = response.json()
+    print(data)
+
+    if "error" in data:
+        return jsonify({"message": "User1 not found."}), 404
+    
     return jsonify({"message": "User not found."}), 404
+
+
+def get_auth0_token():
+    url = f"https://dev-1u4qab05mr75h3uz.us.auth0.com/oauth/token"
+    
+    headers = {
+        'content-type': 'application/json'
+    }
+
+    payload = {
+        'client_id': os.environ.get('AUTH0_CLIENT_ID'),
+        'client_secret': os.environ.get('AUTH0_CLIENT_SECRET'),
+        'audience': f"https://{os.environ.get('AUTH0_DOMAIN')}/api/v2/",
+        'grant_type': 'client_credentials'
+    }
+
+    response = requests.post(url, json=payload, headers=headers)
+    
+    # Raise an error if the request fails
+    response.raise_for_status()
+
+    # Extract and return the access token
+    return response.json()['access_token']
 
 # Protected Routes
 @app.route("/protected", methods=["GET"])
