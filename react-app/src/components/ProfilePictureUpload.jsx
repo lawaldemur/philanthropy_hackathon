@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 
-function FileUpload({ onUpload }) {
+function FileUpload({ onUpload, userData }) {
   const [selectedFile, setSelectedFile] = useState(null);
 
   const handleFileChange = (event) => {
@@ -20,9 +20,8 @@ function FileUpload({ onUpload }) {
           'Content-Type': 'multipart/form-data'
         }
       });
-      
       const fileUrl = response.data.file_url;
-      onUpload(fileUrl);
+      console.log('File uploaded successfully:', fileUrl);
     } catch (error) {
       console.log('Error uploading file:', error.response.data.error);
       // Display an error message to the user or handle the error as needed
