@@ -1,6 +1,7 @@
 # app.py
 from flask import Flask, request, redirect, send_from_directory, jsonify, session
 from flask_jwt_extended import JWTManager, jwt_required, get_jwt_identity
+from flask_mail import Mail, Message
 from pymongo import MongoClient
 from flask_cors import CORS
 import os
@@ -133,6 +134,8 @@ def user_data():
 def logout():
     session.clear()
     return redirect("/index")
+
+@app.route("/find_user_by_id/<user_id>")
 def find_user_by_id(user_id):
     """
     Retrieves a user from the database by their integer ID.
@@ -426,6 +429,42 @@ def serve_react_app(path):
         return send_from_directory(app.static_folder, path)
     else:
         return send_from_directory(app.static_folder, "index.html")
+    
+
+# app.config['MAIL_SERVER'] = 'smtp.gmail.com'
+# app.config['MAIL_PORT'] = 465
+# app.config['MAIL_USERNAME'] = os.getenv("EMAIL_USER")
+# app.config['MAIL_PASSWORD'] = os.getenv("EMAIL_PASS")
+# app.config['MAIL_USE_TLS'] = False
+# app.config['MAIL_USE_SSL'] = True
+
+# mail = Mail(app)
+
+# @app.route('/send-email/<recipient_email>', methods=['POST'])
+# def send_email(recipient_email):
+#     if not recipient_email:
+#         return jsonify({'error': 'Email address is required'}), 400
+    
+#     EMAIL_SUBJECT = "New Request From Volunteer Hub!"
+#     EMAIL_BODY = """
+#     Hello,
+
+#     You recieved a new activity request from ####! We are excited to have you on board.
+
+#     Best regards,
+#     The Volunteer Team
+#     """
+
+#     try:
+#         # Send the email
+#         msg = Message(EMAIL_SUBJECT, sender=app.config['MAIL_USERNAME'], recipients=[recipient_email])
+#         msg.body = EMAIL_BODY
+#         mail.send(msg)
+
+#         return jsonify({'message': f'Email sent successfully to {recipient_email}!'}), 200
+#     except Exception as e:
+#         return jsonify({'error': f'Failed to send email: {str(e)}'}), 500
+
 
 if __name__ == '__main__':
     app.run(debug=True, host="localhost", port=8000)

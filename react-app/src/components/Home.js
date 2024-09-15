@@ -45,11 +45,20 @@ function Home() {
         let url = "http://localhost:8000/get_posts";
         let headers = {};
 
-        
-
         const response = await fetch(url, { headers });
         const data = await response.json();
         console.log(`data: ${data}`);
+
+        for (let post of data) {
+          try {
+            const authorResponse = await axios.get(`http://localhost:8000/find_user_by_id/${post["author_id"]}`);
+            const author = authorResponse.data;
+            post["email"] = author["email"];
+          } catch (error) {
+            console.error(`Error fetching author for post ${post["author_id"]}:`, error);
+          }
+        }
+
         setPosts(data);
       } catch (error) {
         console.error("Error fetching posts:", error);
@@ -64,8 +73,6 @@ function Home() {
       try {
         let url = "http://localhost:8000/get_categories";
         let headers = {};
-
-      
 
         const response = await fetch(url, { headers });
         const data = await response.json();

@@ -1,6 +1,33 @@
 import React from "react";
+import axios from 'axios';
 
 function Modal({ selectedPost, closeModal }) {
+
+  const sendEmail = async () => {
+    const recipientEmail = selectedPost?.email; // Assuming selectedPost is already defined in your state
+
+    if (!recipientEmail) {
+      alert('Email not found!');
+      return;
+    }
+
+    try {
+      // Send a POST request to the Flask endpoint
+      const response = await axios.post(`http://localhost:8000/send-email/${recipientEmail}`);
+      if (response.status === 200) {
+        alert('Email sent successfully!');
+      } else {
+        alert('Failed to send email.');
+      }
+    } catch (error) {
+      console.error('Error sending email:', error);
+      alert('There was an error sending the email.');
+    } finally {
+      closeModal();  // Assuming closeModal is a function to close the modal
+    }
+  };
+
+
   return (
     <div className="fixed z-10 inset-0 overflow-y-auto">
       <div className="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
@@ -46,6 +73,7 @@ function Modal({ selectedPost, closeModal }) {
             </div>
           </div>
           <div className="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+            
             <button
               type="button"
               className="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-blue-600 text-base font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:ml-3 sm:w-auto sm:text-sm"
@@ -53,6 +81,17 @@ function Modal({ selectedPost, closeModal }) {
             >
               Close
             </button>
+
+            <a href={"mailto:"+selectedPost?.email}>
+            <button
+              type="button"
+              className="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-green-600 text-base font-medium text-white hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:ml-3 sm:w-auto sm:text-sm"
+              onClick={closeModal}
+            >
+              Email
+            </button>
+            </a>
+
           </div>
         </div>
       </div>
