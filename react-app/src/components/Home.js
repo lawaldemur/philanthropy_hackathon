@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import Nav from "./Nav";
+import Login from "./Login";
 import { useAuth0 } from "@auth0/auth0-react";
 
 function Home() {
@@ -92,6 +93,7 @@ function Home() {
   return (
     <div>
       <Nav />
+      <Login />
       <header className="w-full container mx-auto">
         <div className="flex flex-col items-center py-12">
           <p
