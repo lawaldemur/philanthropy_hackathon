@@ -1,20 +1,18 @@
 # app.py
-import math
-import random
+
 from flask import Flask, request, redirect, send_from_directory, jsonify, session
-from flask_jwt_extended import JWTManager, jwt_required, get_jwt_identity
+from flask_jwt_extended import JWTManager
 from pymongo import MongoClient
 from flask_cors import CORS
 import os
+from geopy.geocoders import Nominatim
 from dotenv import load_dotenv
 import boto3
 from botocore.exceptions import NoCredentialsError
-from jose import jwt
 from authlib.integrations.flask_client import OAuth
 from functools import wraps
 from urllib.request import urlopen
 import json
-from urllib.parse import urlencode
 # from datetime import datetime
 import requests
 import datetime
@@ -395,6 +393,10 @@ def create_post(auth0_sub):
     last_post = db.posts.find_one(sort=[("id", -1)])
     new_post_id = last_post['id'] + 1 if last_post else 1
 
+    #API call to get the latitude and longitude
+    geolocator = Nominatim(user_agent="HopHacks2024")
+    position = geolocator.geocode(location, country_codes="US")
+
     # Create the new post
     new_post = {
         "id": new_post_id,
@@ -404,6 +406,8 @@ def create_post(auth0_sub):
         "category_id": data["category_id"],
         "image_url": image_url,
         "location": location,
+        "lat": position.latitude,
+        "lng": position.longitude,
         "requirements": requirements,
         "date_created": datetime.datetime.utcnow()
     }

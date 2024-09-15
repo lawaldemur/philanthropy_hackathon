@@ -187,7 +187,7 @@ function Home() {
                           Full-time
                         </span>
                         <span className="bg-gray-500 text-white text-xs px-2 py-1 rounded-full">
-                          Government
+                          {category ? category.name : "Category not found"}
                         </span>
                         <span className="bg-green-500 text-white text-xs px-2 py-1 rounded-full">
                           7 days ago
