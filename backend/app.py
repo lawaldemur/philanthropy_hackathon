@@ -1,9 +1,5 @@
 # app.py
-<<<<<<< HEAD
 from flask import Flask, request, redirect, send_from_directory, jsonify, session
-=======
-from flask import Flask, request, send_from_directory, jsonify, session, redirect
->>>>>>> 6535939 (met blank page when visiting profile)
 from flask_jwt_extended import JWTManager, jwt_required, get_jwt_identity
 from pymongo import MongoClient
 from flask_cors import CORS
