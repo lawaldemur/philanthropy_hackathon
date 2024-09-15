@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import axios from 'axios';
 import Modal from "./Modal";
 import Nav from "./Nav";
 import { useAuth0 } from "@auth0/auth0-react";
@@ -12,6 +13,8 @@ function Home() {
   const [selectedCategoryId, setSelectedCategoryId] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedPost, setSelectedPost] = useState(null);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [userData, setUserData] = useState(null);
 
   const { getAccessTokenSilently, isAuthenticated } = useAuth0();
 
@@ -25,6 +28,20 @@ function Home() {
     ? posts.filter((post) => post["category_id"] === selectedCategoryId)
     : posts;
 
+
+    useEffect(() => {
+      const fetchUserData = async () => {
+        try {
+          const response = await axios.get('/api/user-data');
+          setUserData(response.data);
+          setIsLoggedIn(true);
+        } catch (error) {
+          console.error('Error fetching user data:', error);
+        }
+      };
+  
+      fetchUserData();
+    }, []);
   useEffect(() => {
     const fetchPosts = async () => {
       try {
@@ -83,7 +100,7 @@ function Home() {
     <div className="relative h-screen flex overflow-hidden">
 
         <div className="w-full sm:w-1/2 h-full overflow-y-auto bg-white bg-opacity-90 z-10">
-          <Nav />
+          <Nav isLoggedIn={isLoggedIn} userData={userData} />
           <ProfilePictureUpload />
           <header
             className="w-full container mx-auto"

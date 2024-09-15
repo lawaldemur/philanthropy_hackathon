@@ -1,23 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 
-const LoginButton = () => {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [userData, setUserData] = useState(null);
-
-  useEffect(() => {
-    const fetchUserData = async () => {
-      try {
-        const response = await axios.get('/api/user-data');
-        setUserData(response.data);
-        setIsLoggedIn(true);
-      } catch (error) {
-        console.error('Error fetching user data:', error);
-      }
-    };
-
-    fetchUserData();
-  }, []);
+const LoginButton = ({isLoggedIn, userData}) => {
+ 
 
   const handleLogin = async () => {
     try {

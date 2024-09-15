@@ -3,7 +3,7 @@ import React from "react";
 import { Link, useLocation } from "react-router-dom";
 import Login from "./Login";
 
-function Nav() {
+function Nav({isLoggedIn, userData}) {
   const location = useLocation();
 
   return (
@@ -38,14 +38,28 @@ function Nav() {
            
             <div className="flex gap-3">
 
-            <Login className="bg-white text-blue-800 hover:bg-gray-200 text-sm font-bold py-2 px-4 rounded" /> 
+            <Login className="bg-white text-blue-800 hover:bg-gray-200 text-sm font-bold py-2 px-4 rounded" isLoggedIn={isLoggedIn} userData={userData} /> 
               
+            <div className="flex items-center">
+              <div className="w-10 h-10 bg-yellow-500 rounded-full flex justify-center items-center">
+                <Link to="/profile">
+                  
+                  <img
+                    className="w-10 h-10 rounded-full"
+                    src={
+                      "https://philanthropyhackathon.s3.amazonaws.com/profile_pics/1.jpeg"
+                    }
+                    alt="User profile"
+                  />
+                </Link>
+              </div>
+              </div>
             </div>
             
             {/* <div className="flex items-center">
               <div className="w-10 h-10 bg-yellow-500 rounded-full flex justify-center items-center">
                 <Link to="/profile">
-                  <Login />
+                  
                   <img
                     className="w-10 h-10 rounded-full"
                     src={
