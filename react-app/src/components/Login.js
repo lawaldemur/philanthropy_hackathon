@@ -1,52 +1,51 @@
-import React from "react";
-import { useAuth0 } from "@auth0/auth0-react";
-import Nav from "./Nav";
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 
-function SignIn() {
-  const { loginWithRedirect, logout, isAuthenticated } = useAuth0();
+const LoginButton = () => {
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [userData, setUserData] = useState(null);
 
-  return (
-    <>
-      <div className="flex min-h-full flex-1 flex-col justify-center px-6 py-12 lg:px-8">
-        <div className="sm:mx-auto sm:w-full sm:max-w-sm">
-          <img
-            alt="Your Company"
-            src="https://tailwindui.com/img/logos/mark.svg?color=indigo&shade=600"
-            className="mx-auto h-10 w-auto"
-          />
-          <h2 className="mt-10 text-center text-2xl font-bold leading-9 tracking-tight text-gray-900">
-            Sign in to your account
-          </h2>
-        </div>
+  useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        const response = await axios.get('/api/user-data');
+        setUserData(response.data);
+        setIsLoggedIn(true);
+      } catch (error) {
+        console.error('Error fetching user data:', error);
+      }
+    };
 
-        <div className="mt-10 sm:mx-auto sm:w-full sm:max-w-sm">
-          {!isAuthenticated && (
-            <div>
-              {/* Auth0 login button */}
-              <button
-                onClick={() => loginWithRedirect()}
-                className="flex w-full justify-center rounded-md bg-indigo-600 px-3 py-1.5 text-sm font-semibold leading-6 text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
-              >
-                Sign in with Auth0
-              </button>
-            </div>
-          )}
+    fetchUserData();
+  }, []);
 
-          {isAuthenticated && (
-            <div className="text-center mt-4">
-              <p className="text-sm text-gray-500">You are logged in.</p>
-              <button
-                onClick={() => logout()}
-                className="mt-4 flex w-full justify-center rounded-md bg-red-600 px-3 py-1.5 text-sm font-semibold leading-6 text-white shadow-sm hover:bg-red-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-600"
-              >
-                Log Out
-              </button>
-            </div>
-          )}
-        </div>
+  const handleLogin = async () => {
+    try {
+      window.location.href = '/api/login';
+    } catch (error) {
+      console.error('Error during login:', error);
+    }
+  };
+
+  const handleLogout = async () => {
+    try {
+      const response = await axios.get('/api/logout');
+      window.location.href = response.data.logout_url;
+    } catch (error) {
+      console.error('Error during logout:', error);
+    }
+  };
+
+  if (isLoggedIn) {
+    return (
+      <div>
+        <h2>Welcome, {userData.name}!</h2>
+        <button onClick={handleLogout}>Logout</button>
       </div>
-    </>
-  );
-}
+    );
+  }
 
-export default SignIn;
+  return <button onClick={handleLogin}>Log in with Google</button>;
+};
+
+export default LoginButton;

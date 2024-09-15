@@ -1,5 +1,5 @@
 # app.py
-from flask import Flask, request, send_from_directory, jsonify
+from flask import Flask, request, send_from_directory, jsonify, session
 from flask_jwt_extended import JWTManager, jwt_required, get_jwt_identity
 from pymongo import MongoClient
 from flask_cors import CORS
@@ -8,16 +8,19 @@ from dotenv import load_dotenv
 import boto3
 from botocore.exceptions import NoCredentialsError
 from jose import jwt
+from authlib.integrations.flask_client import OAuth
 from functools import wraps
 from urllib.request import urlopen
 import json
+from urllib.parse import urlencode
 from datetime import datetime
+import requests
 
 
 load_dotenv()
 
 app = Flask(__name__, static_folder="../react-app/build", static_url_path="")
-CORS(app, resources={r"/*": {"origins": "http://localhost:3000"}})  # Adjust origins as needed
+CORS(app, resources={r"/*": {"origins": "http://localhost:3000"}})
 app.secret_key = os.urandom(24).hex()
 app.config['JWT_SECRET_KEY'] = os.environ.get('JWT_SECRET_KEY', 'default_secret_key')
 app.config['JWT_ALGORITHM'] = 'RS256'
@@ -45,91 +48,71 @@ ALGORITHMS = ["RS256"]
 jwks_url = f'https://{AUTH0_DOMAIN}/.well-known/jwks.json'
 jwks = json.loads(urlopen(jwks_url).read())
 
-def get_token_auth_header():
-    """Obtains the Access Token from the Authorization Header"""
-    auth = request.headers.get("Authorization", None)
-    if not auth:
-        return jsonify({"message": "Authorization header missing."}), 401
+oauth = OAuth(app)
+# auth0 = oauth.register(
+#     'auth0',
+#     client_id=os.environ.get('AUTH0_CLIENT_ID'),
+#     client_secret=os.environ.get('AUTH0_CLIENT_SECRET'),
+#     api_base_url='https://dev-1u4qab05mr75h3uz.us.auth0.com/',
+#     access_token_url='https://dev-1u4qab05mr75h3uz.us.auth0.com/oauth/token',
+#     authorize_url='https://dev-1u4qab05mr75h3uz.us.auth0.com/authorize',
+#     client_kwargs={
+#         'scope': 'openid profile email',
+#     },
+# )
+auth0 = oauth.register(
+    name='google',
+    client_id=os.environ.get('GOOGLE_CLIENT_ID'),
+    client_secret=os.environ.get('GOOGLE_CLIENT_SECRET'),
+    access_token_url='https://accounts.google.com/o/oauth2/token',
+    access_token_params=None,
+    authorize_url='https://accounts.google.com/o/oauth2/auth',
+    authorize_params=None,
+    api_base_url='https://www.googleapis.com/oauth2/v1/',
+    userinfo_endpoint='https://openidconnect.googleapis.com/v1/userinfo',
+    # This is only needed if using openId to fetch user info
+    client_kwargs={'scope': 'openid email profile'},
+    jwks_uri = "https://www.googleapis.com/oauth2/v3/certs"
+)
 
-    parts = auth.split()
+@app.route('/api/login')
+def login():
+    return auth0.authorize_redirect(redirect_uri='http://localhost:8000/api/callback')
 
-    if parts[0].lower() != "bearer":
-        return jsonify({"message": "Authorization header must start with Bearer."}), 401
-    elif len(parts) == 1:
-        return jsonify({"message": "Token not found."}), 401
-    elif len(parts) > 2:
-        return jsonify({"message": "Authorization header must be Bearer token."}), 401
+@app.route('/api/callback')
+def callback_handling():
+    auth0.authorize_access_token()
+    resp = auth0.get('userinfo')
+    userinfo = resp.json()
 
-    token = parts[1]
-    return token
+    session['jwt_payload'] = userinfo
+    ### userinfo
+    #{'id': '105290470073128554236', 'email': 'kiwick7@gmail.com', 'verified_email': True, 'name': 'Kiril', 'given_name': 'Kiril', 'picture': 'https://lh3.googleusercontent.com/a/ACg8ocLxzkIz7nSsa5N2yYDkK5vi10IzaufKc5HNVstFkSruIU3B1w=s96-c'}
+    ###
+    print(userinfo)
 
-def verify_jwt(token):
-    """Verifies the JWT using Auth0's public keys"""
-    try:
-        unverified_header = jwt.get_unverified_header(token)
-    except jwt.JWTError:
-        return jsonify({"message": "Invalid token header."}), 401
+    return jsonify(userinfo), 200
 
-    rsa_key = {}
-    for key in jwks["keys"]:
-        if key["kid"] == unverified_header.get("kid"):
-            rsa_key = {
-                "kty": key["kty"],
-                "kid": key["kid"],
-                "use": key["use"],
-                "n": key["n"],
-                "e": key["e"]
-            }
-            break
-    if rsa_key:
-        try:
-            payload = jwt.decode(
-                token,
-                rsa_key,
-                algorithms=ALGORITHMS,
-                audience=API_AUDIENCE,
-                issuer=f'https://{AUTH0_DOMAIN}/'
-            )
-            return payload
-        except jwt.ExpiredSignatureError:
-            return jsonify({"message": "Token expired."}), 401
-        except jwt.JWTClaimsError:
-            return jsonify({"message": "Incorrect claims. Please, check the audience and issuer."}), 401
-        except Exception:
-            return jsonify({"message": "Unable to parse authentication token."}), 401
-    return jsonify({"message": "Unable to find appropriate key."}), 401
+@app.route('/api/user-data')
+def user_data():
+    if 'profile' in session:
+        user_id = session['profile']['user_id']
+        user = mongo.db.users.find_one({'user_id': user_id})
+        if user:
+            return jsonify({
+                'name': user['name'],
+                'email': user['email'],
+            })
+    return jsonify({'error': 'User not found'}), 404
 
-def requires_auth(f):
-    @wraps(f)
-    def decorated(*args, **kwargs):
-        token = get_token_auth_header()
-        payload = verify_jwt(token)
-        if isinstance(payload, tuple):
-            return payload  # Error response
-        return f(payload, *args, **kwargs)
-    return decorated
+@app.route('/api/logout')
+def logout():
+    session.clear()
+    params = {'returnTo': 'http://localhost:8000', 'client_id': os.environ.get('GOOGLE_CLIENT_ID')}
+    return jsonify({'logout_url': auth0.api_base_url + '/v2/logout?' + urlencode(params)}), 200
 
-def find_user_by_id(user_id):
-    """
-    Retrieves a user from the database by their integer ID.
-    
-    Parameters:
-        user_id (int): The unique integer ID of the user.
-        
-    Returns:
-        dict or None: The user document if found, else None.
-    """
-    try:
-        user_id = int(user_id)
-    except (ValueError, TypeError):
-        return None
 
-    user = db.users.find_one({"id": user_id})
-    if user:
-        user["_id"] = str(user["_id"])
-        user.pop("password", None)  # Exclude sensitive information
-        return user
-    return None
+
 
 def find_user_by_sub(auth0_sub):
     """
@@ -148,10 +131,6 @@ def find_user_by_sub(auth0_sub):
         return user
     return None
 
-# Public Routes
-@app.route("/status")
-def status():
-    return {"status": "running 💡"}, 200
 
 @app.route("/get_posts", methods=["GET"])
 def get_posts():
@@ -222,14 +201,43 @@ def get_user_route(auth0_sub):
     user = find_user_by_sub(auth0_sub)
     if user:
         return jsonify(user), 200
+    
+    
+    # create a new user
+    response = requests.get(f"https://{os.environ.get('AUTH0_DOMAIN')}/api/v2/users/{auth0_sub}", headers={
+        'Authorization': f"Bearer {get_auth0_token()}"
+    })
+    data = response.json()
+    print(data)
+
+    if "error" in data:
+        return jsonify({"message": "User1 not found."}), 404
+    
     return jsonify({"message": "User not found."}), 404
 
-# Protected Routes
-@app.route("/protected", methods=["GET"])
-@requires_auth
-def protected_route(payload):
-    current_user = payload['sub']  # Auth0 user ID
-    return jsonify(logged_in_as=current_user), 200
+
+def get_auth0_token():
+    url = f"https://dev-1u4qab05mr75h3uz.us.auth0.com/oauth/token"
+    
+    headers = {
+        'content-type': 'application/json'
+    }
+
+    payload = {
+        'client_id': os.environ.get('AUTH0_CLIENT_ID'),
+        'client_secret': os.environ.get('AUTH0_CLIENT_SECRET'),
+        'audience': f"https://{os.environ.get('AUTH0_DOMAIN')}/api/v2/",
+        'grant_type': 'client_credentials'
+    }
+
+    response = requests.post(url, json=payload, headers=headers)
+    
+    # Raise an error if the request fails
+    response.raise_for_status()
+
+    # Extract and return the access token
+    return response.json()['access_token']
+
 
 @app.route("/upload_file", methods=["POST"])
 def upload_file():

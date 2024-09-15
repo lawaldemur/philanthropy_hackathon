@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import Modal from "./Modal";
 import Nav from "./Nav";
+import Login from "./Login";
 import { useAuth0 } from "@auth0/auth0-react";
 import ProfilePictureUpload from './ProfilePictureUpload';
 import MapComponent from "./MapComponent";
@@ -79,6 +80,7 @@ function Home() {
   };
 
   return (
+
     <div className="relative h-screen flex overflow-hidden">
       {/* Posts Section */}
       <div className="w-full sm:w-1/2 h-full overflow-y-auto bg-white bg-opacity-90 z-10"
