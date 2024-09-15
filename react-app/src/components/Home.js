@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import Modal from "./Modal";
 import Nav from "./Nav";
 import { useAuth0 } from "@auth0/auth0-react";
 import ProfilePictureUpload from './ProfilePictureUpload';
@@ -11,8 +11,6 @@ function Home() {
   const [selectedCategoryId, setSelectedCategoryId] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedPost, setSelectedPost] = useState(null);
-
-
 
   const { getAccessTokenSilently, isAuthenticated } = useAuth0();
 
@@ -29,9 +27,8 @@ function Home() {
   };
 
   const filteredPosts = selectedCategoryId
-    ? posts.filter(post => post["category_id"] === selectedCategoryId)
+    ? posts.filter((post) => post["category_id"] === selectedCategoryId)
     : posts;
-
 
   useEffect(() => {
     const fetchPosts = async () => {
@@ -77,10 +74,6 @@ function Home() {
     fetchCategories();
   }, [getAccessTokenSilently, isAuthenticated]);
 
-  const increment = () => {};
-
-  const decrement = () => {};
-
   const openModal = (post) => {
     setSelectedPost(post);
     setIsModalOpen(true);
@@ -100,6 +93,7 @@ function Home() {
             className="font-bold text-gray-800 uppercase hover:text-gray-700 text-5xl"
           >
             Volunteer Hub
+
           </p>
           <p className="text-lg text-gray-600">Discover volunteers in your area</p>
         </div>
@@ -153,51 +147,64 @@ function Home() {
                     </span>
                   </div>
                 </div>
-              </div>
-            </article>
-          </section>
-        );
-      })}
-      {/* Modal */}
-      {isModalOpen && (
-        <div className="fixed z-10 inset-0 overflow-y-auto">
-          <div className="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
-            <div className="fixed inset-0 transition-opacity" aria-hidden="true">
-              <div className="absolute inset-0 bg-gray-500 opacity-75"></div>
-            </div>
 
-            <span className="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">
-              &#8203;
-            </span>
-
-            <div className="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
-              <div className="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
-                <div className="sm:flex sm:items-start">
-                  <div className="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left">
-                    <h3 className="text-lg leading-6 font-medium text-gray-900">
-                      {selectedPost?.title}
-                    </h3>
-                    <div className="mt-2">
-                      <p className="text-sm text-gray-500">
-                        {selectedPost?.description}
+                {/* Article */}
+                <article
+                  className="flex flex-col shadow my-4"
+                  onClick={() => openModal(post)}
+                >
+                  <div className="bg-white flex flex-col justify-start p-6">
+                    <a
+                      href="#"
+                      className="text-blue-700 text-sm font-bold uppercase pb-4"
+                    >
+                      {category ? category.name : "Category not found"}
+                    </a>
+                    <a
+                      href="#"
+                      className="text-3xl font-bold hover:text-gray-700 pb-4"
+                    >
+                      {post.title}
+                    </a>
+                    <p className="text-sm pb-3">
+                      By{" "}
+                      <a href="#" className="font-semibold hover:text-gray-800">
+                        {post.author_first_name} {post.author_last_name}
+                      </a>
+                    </p>
+                    <p>{post.description}</p>
+                    <div>
+                      <p className="text-blue-700 font-bold">$46.06 / hr</p>
+                      <p className="text-gray-600 text-sm">
+                        Financial District · 100 Gold St · New York
                       </p>
                     </div>
+                    <div className="flex justify-between items-center mt-4">
+                      {/* Badges */}
+                      <div className="flex space-x-2">
+                        <span className="bg-blue-500 text-white text-xs px-2 py-1 rounded-full">
+                          button 1
+                        </span>
+                        <span className="bg-gray-500 text-white text-xs px-2 py-1 rounded-full">
+                          button 2
+                        </span>
+                        <span className="bg-green-500 text-white text-xs px-2 py-1 rounded-full">
+                          button 3
+                        </span>
+                      </div>
+                    </div>
                   </div>
-                </div>
-              </div>
-              <div className="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
-                <button
-                  type="button"
-                  className="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-blue-600 text-base font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:ml-3 sm:w-auto sm:text-sm"
-                  onClick={closeModal}
-                >
-                  Close
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
+                </article>
+              </section>
+            );
+          })}
+          {/* Modal */}
+          {isModalOpen && (
+            <Modal
+              selectedPost={selectedPost} // Pass the selected post
+              closeModal={closeModal}
+            />
+          )}
         </div>
 
         <nav className="w-full py-4 border-t border-b bg-gray-100">
@@ -221,19 +228,19 @@ function Home() {
             }`}
           >
             <div className="w-full container mx-auto flex flex-col sm:flex-row items-center justify-center text-sm font-bold uppercase mt-0 px-6 py-2">
-              { categories.map((category) => ( 
-              <a href="#"
-              className={`hover:bg-gray-400 rounded py-2 px-4 mx-2 ${
-
-                selectedCategoryId === category["_id"]
-                  ? "bg-gray-400 text-gray-600"
-                  : ""
-              }`}
-              data-id={category["id"]}
-              onClick={() => handleCategoryClick(category["_id"])}>
-
-                {category["name"]}
-              </a>
+              {categories.map((category) => (
+                <a
+                  href="#"
+                  className={`hover:bg-gray-400 rounded py-2 px-4 mx-2 ${
+                    selectedCategoryId === category["_id"]
+                      ? "bg-gray-500 text-white"
+                      : ""
+                  }`}
+                  data-id={category["id"]}
+                  onClick={() => handleCategoryClick(category["_id"])}
+                >
+                  {category["name"]}
+                </a>
               ))}
             </div>
           </div>
