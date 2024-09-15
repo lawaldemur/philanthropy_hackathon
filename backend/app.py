@@ -1,5 +1,5 @@
 # app.py
-from flask import Flask, request, send_from_directory, jsonify, session
+from flask import Flask, request, redirect, send_from_directory, jsonify, session
 from flask_jwt_extended import JWTManager, jwt_required, get_jwt_identity
 from pymongo import MongoClient
 from flask_cors import CORS
@@ -111,7 +111,7 @@ def callback_handling():
         result = db.users.insert_one(new_user)
     # print(userinfo)
 
-    return jsonify(user_info), 200
+    return redirect("/")
 
 
 @app.route('/api/user-data')
