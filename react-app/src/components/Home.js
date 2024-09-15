@@ -5,7 +5,6 @@ import { useAuth0 } from "@auth0/auth0-react";
 import ProfilePictureUpload from './ProfilePictureUpload';
 import MapComponent from "./MapComponent";
 
-
 function Home() {
   const [open, setOpen] = useState(false);
   const [posts, setPosts] = useState([]);
@@ -16,7 +15,6 @@ function Home() {
 
   const { getAccessTokenSilently, isAuthenticated } = useAuth0();
 
-  // Handle category click
   const handleCategoryClick = (categoryId) => {
     setSelectedCategoryId(
       selectedCategoryId === categoryId ? null : categoryId
@@ -81,20 +79,66 @@ function Home() {
   };
 
   return (
-    <div>
-      <Nav />
-      <ProfilePictureUpload />
-      <header className="w-full container mx-auto">
-        <div className="flex flex-col items-center py-12">
-          <p className="font-bold text-gray-800 uppercase hover:text-gray-700 text-5xl">
-            Volunteer Hub
-          </p>
-          <p className="text-lg text-gray-600">Discover volunteers in your area</p>
-        </div>
-      </header>
+    <div className="relative h-screen flex overflow-hidden">
+      {/* Posts Section */}
+      <div className="w-full sm:w-1/2 h-full overflow-y-auto bg-white bg-opacity-90 z-10"
 
-      <div className="flex flex-col sm:flex-row container mx-auto py-6">
-        <div className="w-full sm:w-3/4 flex flex-wrap py-6">
+      >
+        <Nav />
+        <ProfilePictureUpload />
+        <header className="w-full container mx-auto"
+          style={{
+            backgroundImage: 'url("https://images.unsplash.com/photo-1565803974275-dccd2f933cbb")',
+            backgroundSize: "cover",
+            backgroundRepeat: 'no-repeat',
+            backgroundPosition: 'center',
+            height: '400px',
+
+          }}>
+          <div className="flex flex-col items-center py-12">
+            <p className="font-bold text-white uppercase hover:text-gray-700 text-5xl">
+              Volunteer Hub
+            </p>
+            <p className="text-lg text-white">Discover volunteers in your area</p>
+          </div>
+        </header>
+
+        {/* Categories Section */}
+        <nav className="w-full py-4 border-t border-b bg-gray-100">
+          <div className="block sm:hidden">
+            <button
+              className="block md:hidden text-base font-bold uppercase text-center flex justify-center items-center"
+              onClick={() => setOpen(!open)}
+            >
+              Topics{" "}
+              <i
+                className={`fas ml-2 ${open ? "fa-chevron-down" : "fa-chevron-up"
+                  }`}
+              ></i>
+            </button>
+          </div>
+          <div
+            className={`w-full flex-grow sm:flex sm:items-center sm:w-auto ${open ? "block" : "hidden"
+              }`}
+          >
+            <div className="w-full container mx-auto flex flex-col sm:flex-row items-center justify-center text-sm font-bold uppercase mt-0 px-6 py-2">
+              {categories.map((category) => (
+                <button
+                  key={category["_id"]}
+                  className={`hover:bg-gray-400 rounded py-2 px-4 mx-2 ${selectedCategoryId === category["_id"]
+                    ? "bg-gray-500 text-white"
+                    : ""
+                    }`}
+                  onClick={() => handleCategoryClick(category["_id"])}
+                >
+                  {category["name"]}
+                </button>
+              ))}
+            </div>
+          </div>
+        </nav>
+
+        <div className="px-6 py-4">
           {filteredPosts.map((post, index) => {
             const category = categories.find(category => category["_id"] === post["category_id"]);
 
@@ -104,7 +148,7 @@ function Home() {
                 key={post.id || index}
               >
                 <article
-                  className="flex flex-col shadow my-4"
+                  className="flex  flex-col shadow my-4"
                   onClick={() => openModal(post)}
                   style={{ width: "100%" }}
                 >
@@ -150,55 +194,12 @@ function Home() {
             <Modal selectedPost={selectedPost} closeModal={closeModal} />
           )}
         </div>
-
-        <nav className="w-full py-4 border-t border-b bg-gray-100">
-          <div className="block sm:hidden">
-            <button
-              className="block md:hidden text-base font-bold uppercase text-center flex justify-center items-center"
-              onClick={() => setOpen(!open)}
-            >
-              Topics{" "}
-              <i
-                className={`fas ml-2 ${open ? "fa-chevron-down" : "fa-chevron-up"
-                  }`}
-              ></i>
-            </button>
-          </div>
-          <div
-            className={`w-full flex-grow sm:flex sm:items-center sm:w-auto ${open ? "block" : "hidden"
-              }`}
-          >
-            <div className="w-full container mx-auto flex flex-col sm:flex-row items-center justify-center text-sm font-bold uppercase mt-0 px-6 py-2">
-              {categories.map((category) => (
-                <button
-                  key={category["_id"]}
-                  className={`hover:bg-gray-400 rounded py-2 px-4 mx-2 ${selectedCategoryId === category["_id"]
-                    ? "bg-gray-500 text-white"
-                    : ""
-                    }`}
-                  onClick={() => handleCategoryClick(category["_id"])}
-                >
-                  {category["name"]}
-                </button>
-              ))}
-
-
-            </div>
-          </div>
-        </nav>
-        <MapComponent />
       </div>
 
-      <footer className="w-full border-t bg-white pb-12">
-        <div className="w-full container mx-auto flex flex-col items-center">
-          <div
-            className="uppercase pb-6 volunteer_hub_footer"
-            style={{ marginTop: "50px" }}
-          >
-            &copy; Volunteer Hub
-          </div>
-        </div>
-      </footer>
+      {/* Map Section */}
+      <div className="w-full sm:w-1/2 h-full fixed right-0 top-0">
+        <MapComponent />
+      </div>
     </div>
   );
 }
