@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import Nav from "./Nav";
 import { useAuth0 } from "@auth0/auth0-react";
+import ProfilePictureUpload from './ProfilePictureUpload';
 
 function Home() {
   const [open, setOpen] = useState(false);
@@ -92,6 +93,7 @@ function Home() {
   return (
     <div>
       <Nav />
+      <ProfilePictureUpload />
       <header className="w-full container mx-auto">
         <div className="flex flex-col items-center py-12">
           <p
