@@ -105,7 +105,8 @@ def callback_handling():
         "auth0_sub": f"google-oauth2|{user_info.get('id')}",
         "bio": "New user",
         "location": "Unknown",
-        "phone_number": "Unknown" 
+        "phone_number": "Unknown",
+        "profile_pic_filename": "/placeholder.jpeg",
     }
     # Insert the user into the MongoDB collection
         result = db.users.insert_one(new_user)
@@ -123,6 +124,8 @@ def user_data():
             return jsonify({
                 'first_name': user['first_name'],
                 'email': user['email'],
+                'id': user['id'],
+                'profile_pic_filename': user['profile_pic_filename'],
             })
     return jsonify({'error': 'User not found'}), 404
 
@@ -309,13 +312,19 @@ def upload_file():
         return jsonify({"error": "No file selected"}), 400
     
     if file:
-        filename = file.filename
+        filename = session["jwt_payload"]["id"]
+        
         file_path = os.path.join('profile_pics', filename)  # Specify the desired file path in S3
 
         try:
             s3.upload_fileobj(file, S3_BUCKET, file_path, ExtraArgs={'ACL': 'public-read', 'ContentType': file.content_type})
             file_url = f"https://{S3_BUCKET}.s3.amazonaws.com/{file_path}"
             
+            db.users.update_one(
+            {'email': session['jwt_payload']['email']},  # Filter to select the correct user
+            {'$set': {'profile_pic_filename': filename}}  # Update the profile_pic_filename field
+)
+
             return jsonify({"file_url": file_url}), 200
 
         except NoCredentialsError:

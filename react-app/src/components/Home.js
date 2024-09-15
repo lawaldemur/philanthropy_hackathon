@@ -101,7 +101,7 @@ function Home() {
 
         <div className="w-full sm:w-1/2 h-full overflow-y-auto bg-white bg-opacity-90 z-10">
           <Nav isLoggedIn={isLoggedIn} userData={userData} />
-          <ProfilePictureUpload />
+          <ProfilePictureUpload userData={userData} />
           <header
             className="w-full container mx-auto"
             style={{
