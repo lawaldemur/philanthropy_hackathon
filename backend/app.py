@@ -1,9 +1,5 @@
 # app.py
-<<<<<<< HEAD
 from flask import Flask, request, redirect, send_from_directory, jsonify, session
-=======
-from flask import Flask, request, send_from_directory, jsonify, session, redirect
->>>>>>> 6535939 (met blank page when visiting profile)
 from flask_jwt_extended import JWTManager, jwt_required, get_jwt_identity
 from pymongo import MongoClient
 from flask_cors import CORS
@@ -17,7 +13,7 @@ from functools import wraps
 from urllib.request import urlopen
 import json
 from urllib.parse import urlencode
-from datetime import datetime
+# from datetime import datetime
 import requests
 import datetime
 
@@ -398,7 +394,7 @@ def create_post(auth0_sub):
         "image_url": image_url,
         "location": location,
         "requirements": requirements,
-        "date_created": datetime.utcnow()
+        "date_created": datetime.datetime.utcnow()
     }
 
     # Insert the post into the database
