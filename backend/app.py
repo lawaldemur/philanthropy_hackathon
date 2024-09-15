@@ -1,4 +1,6 @@
 # app.py
+import math
+import random
 from flask import Flask, request, redirect, send_from_directory, jsonify, session
 from flask_jwt_extended import JWTManager, jwt_required, get_jwt_identity
 from pymongo import MongoClient
@@ -314,7 +316,7 @@ def upload_file():
         return jsonify({"error": "No file selected"}), 400
     
     if file:
-        filename = session["jwt_payload"]["id"]
+        filename = session["jwt_payload"]["id"] 
         
         file_path = os.path.join('profile_pics', filename)  # Specify the desired file path in S3
 
