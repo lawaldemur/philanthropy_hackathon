@@ -2,7 +2,7 @@
 
 from flask import Flask, request, redirect, send_from_directory, jsonify, session
 from flask_jwt_extended import JWTManager, jwt_required, get_jwt_identity
-// from flask_mail import Mail, Message
+# from flask_mail import Mail, Message
 from pymongo import MongoClient
 from flask_cors import CORS
 import os
