@@ -45,7 +45,7 @@ function Home() {
   useEffect(() => {
     const fetchPosts = async () => {
       try {
-        let url = "http://localhost:5000/get_posts";
+        let url = "http://localhost:8000/get_posts";
         let headers = {};
 
         if (isAuthenticated) {
@@ -68,7 +68,7 @@ function Home() {
   useEffect(() => {
     const fetchCategories = async () => {
       try {
-        let url = "http://localhost:5000/get_categories";
+        let url = "http://localhost:8000/get_categories";
         let headers = {};
 
         if (isAuthenticated) {
@@ -115,15 +115,15 @@ function Home() {
           >
             <div className="flex flex-col items-center py-12">
             <p className="font-black text-white uppercase text-5xl">
-            Volunteer Hub
-          </p>
-          <p className="text-lg text-white">
-            Discover volunteers in your area
-          </p>
-            </div>
-          </header>
+              Volunteer Hub
+            </p>
+            <p className="text-lg text-white">
+              Discover volunteers in your area
+            </p>
+          </div>
+        </header>
 
-          {/* Categories Section */}
+        {/* Categories Section */}
         <nav className="w-full py-4 border-t border-b bg-gray-100">
           <div className="block sm:hidden">
             <button
@@ -193,7 +193,6 @@ function Home() {
                     </p>
                     <p>{post.description}</p>
                     <div>
-                      <p className="text-blue-700 font-bold">$46.06 / hr</p>
                       <p className="text-gray-600 text-sm">
                         Financial District · 100 Gold St · New York
                       </p>

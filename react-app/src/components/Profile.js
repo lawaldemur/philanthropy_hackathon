@@ -1,29 +1,49 @@
 // ./react-app/src/components/Profile.js
 import React, { useEffect, useState } from "react";
 import Nav from "./Nav";
-import { useAuth0 } from '@auth0/auth0-react';
-import Modal from 'react-modal';
-
+import Modal from "react-modal";
+import axios from "axios";
 
 // Set the app element for accessibility
-Modal.setAppElement('#root');
+Modal.setAppElement("#root");
 
 function Profile() {
-  const { user, isAuthenticated, isLoading, getAccessTokenSilently } = useAuth0();
   const [profile, setProfile] = useState(null);
   const [isEditMode, setIsEditMode] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [postData, setPostData] = useState({
-    title: '',
-    description: '',
-    category_id: '',
-    image_url: '',
-    location: '',
-    requirements: ''
+    title: "",
+    description: "",
+    category_id: "",
+    image_url: "",
+    location: "",
+    requirements: "",
   });
   const [categories, setCategories] = useState([]);
   // eslint-disable-next-line
-  const auth0_sub = user.sub;
+
+  const [userData, setUserData] = useState(null);
+  let isAuthenticated = false;
+
+  useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        const response = await axios.get("/api/user-data");
+        console.log(response.data);
+        // setUserData(response.data);
+
+        const email = response.data.email;
+        const response2 = await axios.get("/find_user_by_email/" + email);
+        console.log(response2.data);
+        setUserData(response2.data);
+        isAuthenticated = true;
+      } catch (error) {
+        console.error("Error fetching user data:", error);
+      }
+    };
+
+    fetchUserData();
+  }, []);
 
   // Fetch user profile from backend
 
@@ -31,12 +51,9 @@ function Profile() {
     const fetchProfile = async () => {
       if (isAuthenticated) {
         try {
-          const token = await getAccessTokenSilently();
-          const response = await fetch(`http://localhost:8000/get_user/${user.sub}`, {
-            headers: {
-              'Authorization': `Bearer ${token}`
-            }
-          });
+          const response = await fetch(
+            `http://localhost:8000/find_user_by_email/${userData["email"]}`
+          );
           if (response.ok) {
             const data = await response.json();
             setProfile(data);
@@ -52,7 +69,7 @@ function Profile() {
 
     fetchProfile();
     // We don't include `auth0_sub` because it's static, but still include `isAuthenticated` and other dynamic dependencies
-  }, [isAuthenticated, getAccessTokenSilently, user]);
+  }, [isAuthenticated]);
   // Fetch categories for post creation
 
   useEffect(() => {
@@ -77,9 +94,9 @@ function Profile() {
   // Handle input changes for profile editing
   const handleProfileChange = (e) => {
     const { name, value } = e.target;
-    setProfile(prevProfile => ({
+    setProfile((prevProfile) => ({
       ...prevProfile,
-      [name]: value
+      [name]: value,
     }));
   };
 
@@ -87,15 +104,16 @@ function Profile() {
   const handleProfileSubmit = async (e) => {
     e.preventDefault();
     try {
-      const token = await getAccessTokenSilently();
-      const response = await fetch(`http://localhost:8000/update_profile/${auth0_sub}`, {
-        method: "PUT",
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify(profile)
-      });
+      const response = await fetch(
+        `http://localhost:8000/update_profile/${userData["auth0_sub"]}`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(profile),
+        }
+      );
 
       if (response.ok) {
         // You don't need to assign 'data' if you are not using it
@@ -111,14 +129,12 @@ function Profile() {
     }
   };
 
-
-
   // Handle input changes for new post
   const handlePostChange = (e) => {
     const { name, value } = e.target;
-    setPostData(prevData => ({
+    setPostData((prevData) => ({
       ...prevData,
-      [name]: value
+      [name]: value,
     }));
   };
 
@@ -126,36 +142,37 @@ function Profile() {
   const handlePostSubmit = async (e) => {
     e.preventDefault();
     try {
-      const token = await getAccessTokenSilently();
       // Convert requirements from comma-separated string to array
       const requirementsArray = postData.requirements
-        .split(',')
-        .map(req => req.trim())
-        .filter(req => req !== "");
+        .split(",")
+        .map((req) => req.trim())
+        .filter((req) => req !== "");
 
-      const response = await fetch(`http://localhost:8000/create_post/${auth0_sub}`, {
-        method: "POST",
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify({
-          ...postData,
-          requirements: requirementsArray
-        })
-      });
+      const response = await fetch(
+        `http://localhost:8000/create_post/${userData["auth0_sub"]}`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            ...postData,
+            requirements: requirementsArray,
+          }),
+        }
+      );
 
       if (response.ok) {
         alert("Volunteering post created successfully!");
         setIsModalOpen(false);
         // Optionally, reset the form
         setPostData({
-          title: '',
-          description: '',
-          category_id: '',
-          image_url: '',
-          location: '',
-          requirements: ''
+          title: "",
+          description: "",
+          category_id: "",
+          image_url: "",
+          location: "",
+          requirements: "",
         });
       } else {
         const errorData = await response.json();
@@ -167,12 +184,9 @@ function Profile() {
     }
   };
 
-  if (isLoading) {
-    return <div>Loading...</div>;
-  }
-
   return (
-    isAuthenticated && profile && (
+    isAuthenticated &&
+    profile && (
       <main className="app">
         <Nav />
         {/* Profile Content */}
@@ -180,7 +194,10 @@ function Profile() {
           {/* Banner Image */}
           <div className="relative h-40 w-full mb-4">
             <img
-              src={profile.avatar_url || "https://static.bandana.co/users/profile/default/default.jpg"}
+              src={
+                profile.avatar_url ||
+                "https://static.bandana.co/users/profile/default/default.jpg"
+              }
               alt="Profile Banner"
               className="object-cover w-full h-full"
             />
@@ -192,7 +209,10 @@ function Profile() {
             <div className="w-full md:w-1/3 flex flex-col items-center">
               <div className="relative w-32 h-32 rounded-full overflow-hidden mb-4">
                 <img
-                  src={profile.avatar_url || "https://static.bandana.co/users/profile/default/default.jpg"}
+                  src={
+                    profile.avatar_url ||
+                    "https://static.bandana.co/users/profile/default/default.jpg"
+                  }
                   alt="Profile Avatar"
                   className="w-full h-full object-cover"
                 />
@@ -201,72 +221,86 @@ function Profile() {
                 {isEditMode ? (
                   <form onSubmit={handleProfileSubmit} className="w-full">
                     <div className="mb-2">
-                      <label className="block text-sm font-medium text-gray-700">First Name</label>
+                      <label className="block text-sm font-medium text-gray-700">
+                        First Name
+                      </label>
                       <input
                         type="text"
                         name="first_name"
-                        value={profile.first_name || ''}
+                        value={profile.first_name || ""}
                         onChange={handleProfileChange}
                         className="mt-1 block w-full border-gray-300 rounded-md shadow-sm"
                         required
                       />
                     </div>
                     <div className="mb-2">
-                      <label className="block text-sm font-medium text-gray-700">Last Name</label>
+                      <label className="block text-sm font-medium text-gray-700">
+                        Last Name
+                      </label>
                       <input
                         type="text"
                         name="last_name"
-                        value={profile.last_name || ''}
+                        value={profile.last_name || ""}
                         onChange={handleProfileChange}
                         className="mt-1 block w-full border-gray-300 rounded-md shadow-sm"
                         required
                       />
                     </div>
                     <div className="mb-2">
-                      <label className="block text-sm font-medium text-gray-700">Email</label>
+                      <label className="block text-sm font-medium text-gray-700">
+                        Email
+                      </label>
                       <input
                         type="email"
                         name="email"
-                        value={profile.email || ''}
+                        value={profile.email || ""}
                         disabled
                         className="mt-1 block w-full border-gray-300 rounded-md shadow-sm bg-gray-100"
                       />
                     </div>
                     <div className="mb-2">
-                      <label className="block text-sm font-medium text-gray-700">Phone Number</label>
+                      <label className="block text-sm font-medium text-gray-700">
+                        Phone Number
+                      </label>
                       <input
                         type="text"
                         name="phone_number"
-                        value={profile.phone_number || ''}
+                        value={profile.phone_number || ""}
                         onChange={handleProfileChange}
                         className="mt-1 block w-full border-gray-300 rounded-md shadow-sm"
                       />
                     </div>
                     <div className="mb-2">
-                      <label className="block text-sm font-medium text-gray-700">Location</label>
+                      <label className="block text-sm font-medium text-gray-700">
+                        Location
+                      </label>
                       <input
                         type="text"
                         name="location"
-                        value={profile.location || ''}
+                        value={profile.location || ""}
                         onChange={handleProfileChange}
                         className="mt-1 block w-full border-gray-300 rounded-md shadow-sm"
                       />
                     </div>
                     <div className="mb-2">
-                      <label className="block text-sm font-medium text-gray-700">Avatar URL</label>
+                      <label className="block text-sm font-medium text-gray-700">
+                        Avatar URL
+                      </label>
                       <input
                         type="text"
                         name="avatar_url"
-                        value={profile.avatar_url || ''}
+                        value={profile.avatar_url || ""}
                         onChange={handleProfileChange}
                         className="mt-1 block w-full border-gray-300 rounded-md shadow-sm"
                       />
                     </div>
                     <div className="mb-4">
-                      <label className="block text-sm font-medium text-gray-700">Bio</label>
+                      <label className="block text-sm font-medium text-gray-700">
+                        Bio
+                      </label>
                       <textarea
                         name="bio"
-                        value={profile.bio || ''}
+                        value={profile.bio || ""}
                         onChange={handleProfileChange}
                         className="mt-1 block w-full border-gray-300 rounded-md shadow-sm"
                         rows="3"
@@ -290,11 +324,17 @@ function Profile() {
                   </form>
                 ) : (
                   <>
-                    <h2 className="text-2xl font-bold">{profile.first_name} {profile.last_name}</h2>
+                    <h2 className="text-2xl font-bold">
+                      {profile.first_name} {profile.last_name}
+                    </h2>
                     <p className="text-gray-500">{profile.email}</p>
-                    <p className="text-gray-500">{profile.phone_number || 'Phone number not provided'}</p>
-                    <p className="text-gray-500">{profile.location || 'Location not provided'}</p>
-                    <p className="mt-2">{profile.bio || 'No bio available.'}</p>
+                    <p className="text-gray-500">
+                      {profile.phone_number || "Phone number not provided"}
+                    </p>
+                    <p className="text-gray-500">
+                      {profile.location || "Location not provided"}
+                    </p>
+                    <p className="mt-2">{profile.bio || "No bio available."}</p>
                     <button
                       className="bg-yellow-500 text-brown px-4 py-2 rounded mt-4"
                       onClick={() => setIsEditMode(true)}
@@ -353,10 +393,14 @@ function Profile() {
           className="max-w-3xl mx-auto mt-20 bg-white p-6 rounded shadow-lg"
           overlayClassName="fixed inset-0 bg-gray-500 bg-opacity-75 flex justify-center items-start z-50"
         >
-          <h2 className="text-2xl font-bold mb-4">Create New Volunteering Post</h2>
+          <h2 className="text-2xl font-bold mb-4">
+            Create New Volunteering Post
+          </h2>
           <form onSubmit={handlePostSubmit}>
             <div className="mb-4">
-              <label className="block text-sm font-medium text-gray-700">Title</label>
+              <label className="block text-sm font-medium text-gray-700">
+                Title
+              </label>
               <input
                 type="text"
                 name="title"
@@ -367,7 +411,9 @@ function Profile() {
               />
             </div>
             <div className="mb-4">
-              <label className="block text-sm font-medium text-gray-700">Description</label>
+              <label className="block text-sm font-medium text-gray-700">
+                Description
+              </label>
               <textarea
                 name="description"
                 value={postData.description}
@@ -378,7 +424,9 @@ function Profile() {
               ></textarea>
             </div>
             <div className="mb-4">
-              <label className="block text-sm font-medium text-gray-700">Category</label>
+              <label className="block text-sm font-medium text-gray-700">
+                Category
+              </label>
               <select
                 name="category_id"
                 value={postData.category_id}
@@ -387,13 +435,17 @@ function Profile() {
                 required
               >
                 <option value="">Select a category</option>
-                {categories.map(category => (
-                  <option key={category._id} value={category._id}>{category.name}</option>
+                {categories.map((category) => (
+                  <option key={category._id} value={category._id}>
+                    {category.name}
+                  </option>
                 ))}
               </select>
             </div>
             <div className="mb-4">
-              <label className="block text-sm font-medium text-gray-700">Image URL</label>
+              <label className="block text-sm font-medium text-gray-700">
+                Image URL
+              </label>
               <input
                 type="text"
                 name="image_url"
@@ -403,7 +455,9 @@ function Profile() {
               />
             </div>
             <div className="mb-4">
-              <label className="block text-sm font-medium text-gray-700">Location</label>
+              <label className="block text-sm font-medium text-gray-700">
+                Location
+              </label>
               <input
                 type="text"
                 name="location"
@@ -413,7 +467,9 @@ function Profile() {
               />
             </div>
             <div className="mb-4">
-              <label className="block text-sm font-medium text-gray-700">Requirements (comma-separated)</label>
+              <label className="block text-sm font-medium text-gray-700">
+                Requirements (comma-separated)
+              </label>
               <input
                 type="text"
                 name="requirements"

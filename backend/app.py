@@ -1,5 +1,9 @@
 # app.py
+<<<<<<< HEAD
 from flask import Flask, request, redirect, send_from_directory, jsonify, session
+=======
+from flask import Flask, request, send_from_directory, jsonify, session, redirect
+>>>>>>> 6535939 (met blank page when visiting profile)
 from flask_jwt_extended import JWTManager, jwt_required, get_jwt_identity
 from pymongo import MongoClient
 from flask_cors import CORS
@@ -153,6 +157,8 @@ def find_user_by_id(user_id):
     return None
 
 
+
+@app.route("/find_user_by_email/<user_email>")
 def find_user_by_email(user_email):
     """
     Retrieves a user from the database by their string email.
@@ -409,7 +415,7 @@ def create_post(auth0_sub):
 
 # Serving React App
 @app.route('/', defaults={"path": ""})
-@app.route("/<path:path>")
+@app.route('/profile', defaults={"path": "/profile"})
 def serve_react_app(path):
     if path and os.path.exists(os.path.join(app.static_folder, path)):
         return send_from_directory(app.static_folder, path)
