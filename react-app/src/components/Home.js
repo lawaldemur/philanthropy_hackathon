@@ -93,7 +93,7 @@ function Home() {
         <Nav isLoggedIn={isLoggedIn} userData={userData} />
         
         <header
-          className="w-full container mx-auto"
+          className="w-full container-fluid"
           style={{
             backgroundImage:
               'url("https://images.unsplash.com/photo-1565803974275-dccd2f933cbb")',
