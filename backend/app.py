@@ -16,7 +16,6 @@ from urllib.parse import urlencode
 from datetime import datetime
 import requests
 
-
 load_dotenv()
 
 app = Flask(__name__, static_folder="../react-app/build", static_url_path="")
@@ -83,21 +82,35 @@ def login():
 def callback_handling():
     auth0.authorize_access_token()
     resp = auth0.get('userinfo')
-    userinfo = resp.json()
+    user_info = resp.json()
 
-    session['jwt_payload'] = userinfo
+    session['jwt_payload'] = user_info
     ### userinfo
     #{'id': '105290470073128554236', 'email': 'kiwick7@gmail.com', 'verified_email': True, 'name': 'Kiril', 'given_name': 'Kiril', 'picture': 'https://lh3.googleusercontent.com/a/ACg8ocLxzkIz7nSsa5N2yYDkK5vi10IzaufKc5HNVstFkSruIU3B1w=s96-c'}
     ###
-    print(userinfo)
+    if find_user_by_email(user_info.get("email")) is None: 
+        new_user = {
+            "id": int(user_info["id"]) % 99999,
+        "email": user_info.get("email"),
+        "first_name": user_info.get("given_name"),
+        "last_name": user_info.get("name").split()[-1],
+        "auth0_sub": f"google-oauth2|{user_info.get('id')}",
+        "bio": "New user",
+        "location": "Unknown",
+        "phone_number": "Unknown" 
+    }
+    # Insert the user into the MongoDB collection
+        result = db.users.insert_one(new_user)
+    # print(userinfo)
 
-    return jsonify(userinfo), 200
+    return jsonify(user_info), 200
+
 
 @app.route('/api/user-data')
 def user_data():
     if 'profile' in session:
         user_id = session['profile']['user_id']
-        user = mongo.db.users.find_one({'user_id': user_id})
+        user = db.users.find_one({'user_id': user_id})
         if user:
             return jsonify({
                 'name': user['name'],
@@ -111,8 +124,55 @@ def logout():
     params = {'returnTo': 'http://localhost:8000', 'client_id': os.environ.get('GOOGLE_CLIENT_ID')}
     return jsonify({'logout_url': auth0.api_base_url + '/v2/logout?' + urlencode(params)}), 200
 
+def find_user_by_id(user_id):
+    """
+    Retrieves a user from the database by their integer ID.
+    
+    Parameters:
+        user_id (int): The unique integer ID of the user.
+        
+    Returns:
+        dict or None: The user document if found, else None.
+    """
+    try:
+        user_id = int(user_id)
+    except (ValueError, TypeError):
+        return None
+
+    user = db.users.find_one({"id": user_id})
+    if user:
+        user["_id"] = str(user["_id"])
+        user.pop("password", None)  # Exclude sensitive information
+        return user
+    return None
 
 
+def find_user_by_email(user_email):
+    """
+    Retrieves a user from the database by their string email.
+    
+    Parameters:
+        user_email (string): The reliable identify of the user.
+        
+    Returns:
+        dict or None: The user document if found, else None.
+    """
+
+    user = db.users.find_one({"email": user_email})
+    if user:
+        user["_id"] = str(user["_id"])
+        user.pop("password", None)  # Exclude sensitive information
+        return user
+    return None
+
+
+
+@app.route("/get_categories", methods=["GET"])
+def get_categories():
+    categories = list(db.categories.find())
+    for category in categories:
+        category["_id"] = str(category["_id"])
+    return jsonify(categories), 200
 
 def find_user_by_sub(auth0_sub):
     """
@@ -157,13 +217,6 @@ def get_posts():
             post["author_last_name"] = "Author"
 
     return jsonify(posts), 200
-
-@app.route("/get_categories", methods=["GET"])
-def get_categories():
-    categories = list(db.categories.find())
-    for category in categories:
-        category["_id"] = str(category["_id"])
-    return jsonify(categories), 200
 
 @app.route("/get_post/<post_id>", methods=["GET"])
 def get_post(post_id):

@@ -12,11 +12,12 @@ function Nav() {
     <nav className="w-full py-4 bg-blue-800 shadow">
       <div className="w-full container mx-auto flex flex-wrap items-center justify-between">
         <ul className="flex items-center justify-between font-bold text-sm text-white uppercase no-underline">
-          {location.pathname !== '/' && (<li>
-            <Link className="hover:text-gray-200 hover:underline px-4" to="/">
-              Home
-            </Link>
-          </li>
+          {location.pathname !== "/" && (
+            <li>
+              <Link className="hover:text-gray-200 hover:underline px-4" to="/">
+                Home
+              </Link>
+            </li>
           )}
         </ul>
 
@@ -42,7 +43,6 @@ function Nav() {
                 to="/login"
                 className="bg-white text-blue-800 hover:bg-gray-200 text-sm font-bold py-2 px-4 rounded"
               >
-                Log In
                 <Login />
               </Link>
             </div>
@@ -51,7 +51,12 @@ function Nav() {
               <div className="w-10 h-10 bg-yellow-500 rounded-full flex justify-center items-center">
                 <Link to="/profile">
                   <Login />
-                  <img className="w-10 h-10 rounded-full" src={"https://philanthropyhackathon.s3.amazonaws.com/profile_pics/1.jpeg"} />
+                  <img
+                    className="w-10 h-10 rounded-full"
+                    src={
+                      "https://philanthropyhackathon.s3.amazonaws.com/profile_pics/1.jpeg"
+                    }
+                  />
                 </Link>
               </div>
               <button

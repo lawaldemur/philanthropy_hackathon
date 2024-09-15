@@ -3,7 +3,7 @@ import Modal from "./Modal";
 import Nav from "./Nav";
 import Login from "./Login";
 import { useAuth0 } from "@auth0/auth0-react";
-import ProfilePictureUpload from './ProfilePictureUpload';
+import ProfilePictureUpload from "./ProfilePictureUpload";
 import MapComponent from "./MapComponent";
 
 function Home() {
@@ -29,7 +29,7 @@ function Home() {
   useEffect(() => {
     const fetchPosts = async () => {
       try {
-        let url = "http://localhost:5000/get_posts";
+        let url = "http://localhost:8000/get_posts";
         let headers = {};
 
         if (isAuthenticated) {
@@ -39,6 +39,7 @@ function Home() {
 
         const response = await fetch(url, { headers });
         const data = await response.json();
+        console.log(`data: ${data}`);
         setPosts(data);
       } catch (error) {
         console.error("Error fetching posts:", error);
@@ -51,7 +52,7 @@ function Home() {
   useEffect(() => {
     const fetchCategories = async () => {
       try {
-        let url = "http://localhost:5000/get_categories";
+        let url = "http://localhost:8000/get_categories";
         let headers = {};
 
         if (isAuthenticated) {
@@ -80,28 +81,29 @@ function Home() {
   };
 
   return (
-
     <div className="relative h-screen flex overflow-hidden">
       {/* Posts Section */}
-      <div className="w-full sm:w-1/2 h-full overflow-y-auto bg-white bg-opacity-90 z-10"
-
-      >
+      <div className="w-full sm:w-1/2 h-full overflow-y-auto bg-white bg-opacity-90 z-10">
         <Nav />
         <ProfilePictureUpload />
-        <header className="w-full container mx-auto"
+        <header
+          className="w-full container mx-auto"
           style={{
-            backgroundImage: 'url("https://images.unsplash.com/photo-1565803974275-dccd2f933cbb")',
+            backgroundImage:
+              'url("https://images.unsplash.com/photo-1565803974275-dccd2f933cbb")',
             backgroundSize: "cover",
-            backgroundRepeat: 'no-repeat',
-            backgroundPosition: 'center',
-            height: '400px',
-
-          }}>
+            backgroundRepeat: "no-repeat",
+            backgroundPosition: "center",
+            height: "400px",
+          }}
+        >
           <div className="flex flex-col items-center py-12">
             <p className="font-bold text-white uppercase hover:text-gray-700 text-5xl">
               Volunteer Hub
             </p>
-            <p className="text-lg text-white">Discover volunteers in your area</p>
+            <p className="text-lg text-white">
+              Discover volunteers in your area
+            </p>
           </div>
         </header>
 
@@ -114,23 +116,26 @@ function Home() {
             >
               Topics{" "}
               <i
-                className={`fas ml-2 ${open ? "fa-chevron-down" : "fa-chevron-up"
-                  }`}
+                className={`fas ml-2 ${
+                  open ? "fa-chevron-down" : "fa-chevron-up"
+                }`}
               ></i>
             </button>
           </div>
           <div
-            className={`w-full flex-grow sm:flex sm:items-center sm:w-auto ${open ? "block" : "hidden"
-              }`}
+            className={`w-full flex-grow sm:flex sm:items-center sm:w-auto ${
+              open ? "block" : "hidden"
+            }`}
           >
             <div className="w-full container mx-auto flex flex-col sm:flex-row items-center justify-center text-sm font-bold uppercase mt-0 px-6 py-2">
               {categories.map((category) => (
                 <button
                   key={category["_id"]}
-                  className={`hover:bg-gray-400 rounded py-2 px-4 mx-2 ${selectedCategoryId === category["_id"]
-                    ? "bg-gray-500 text-white"
-                    : ""
-                    }`}
+                  className={`hover:bg-gray-400 rounded py-2 px-4 mx-2 ${
+                    selectedCategoryId === category["_id"]
+                      ? "bg-gray-500 text-white"
+                      : ""
+                  }`}
                   onClick={() => handleCategoryClick(category["_id"])}
                 >
                   {category["name"]}
@@ -142,8 +147,11 @@ function Home() {
 
         <div className="px-6 py-4">
           {filteredPosts.map((post, index) => {
-            const category = categories.find(category => category["_id"] === post["category_id"]);
-
+            const category = categories.find(
+              (category) => category["_id"] === post["category_id"]
+            );
+            // console.log(post);
+            // console.log("HELLO");
             return (
               <section
                 className="w-full flex flex-col items-center px-3 post-section-wrapper"
