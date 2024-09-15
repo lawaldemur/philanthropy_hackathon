@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import Modal from "./Modal";
 import Nav from "./Nav";
+import Login from "./Login";
 import { useAuth0 } from "@auth0/auth0-react";
 import ProfilePictureUpload from './ProfilePictureUpload';
 import MapComponent from "./MapComponent";
@@ -83,7 +84,7 @@ function Home() {
   return (
     <div>
       <Nav />
-      <ProfilePictureUpload />
+      <Login />
       <header className="w-full container mx-auto">
         <div className="flex flex-col items-center py-12">
           <p className="font-bold text-gray-800 uppercase hover:text-gray-700 text-5xl">
