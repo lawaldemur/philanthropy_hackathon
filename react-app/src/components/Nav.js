@@ -2,6 +2,7 @@
 import React from "react";
 import { Link, useLocation } from "react-router-dom";
 import { useAuth0 } from "@auth0/auth0-react";
+import Login from "./Login";
 
 function Nav() {
   const { isAuthenticated, logout } = useAuth0();
@@ -42,12 +43,14 @@ function Nav() {
                 className="bg-white text-blue-800 hover:bg-gray-200 text-sm font-bold py-2 px-4 rounded"
               >
                 Log In
+                <Login />
               </Link>
             </div>
           ) : (
             <div className="flex items-center">
               <div className="w-10 h-10 bg-yellow-500 rounded-full flex justify-center items-center">
                 <Link to="/profile">
+                  <Login />
                   <img className="w-10 h-10 rounded-full" src={"https://philanthropyhackathon.s3.amazonaws.com/profile_pics/1.jpeg"} />
                 </Link>
               </div>
