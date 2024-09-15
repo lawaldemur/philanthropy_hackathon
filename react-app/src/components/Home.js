@@ -185,19 +185,15 @@ function Home() {
                       <p className="pb-6">{post.description}</p>
                       <div>
                         <p className="text-gray-600 text-sm">
-                          Financial District · 100 Gold St · New York
+                        Zip Code: {post.location}
                         </p>
                       </div>
                       <div className="flex flex-wrap gap-2 mt-4">
-                        <span className="bg-blue-500 text-white text-xs px-2 py-1 rounded-full">
-                          Full-time
-                        </span>
+                        
                         <span className="bg-gray-500 text-white text-xs px-2 py-1 rounded-full">
                           {category ? category.name : "Category not found"}
                         </span>
-                        <span className="bg-green-500 text-white text-xs px-2 py-1 rounded-full">
-                          7 days ago
-                        </span>
+                        
                       </div>
                     </div>
                   </article>
@@ -208,7 +204,7 @@ function Home() {
           
           <div className="w-full md:w-1/3">
             <div className="aspect-square">
-              <MapComponent posts={filteredPosts} />
+              <MapComponent filteredPosts={filteredPosts} />
             </div>
           </div>
         </div>

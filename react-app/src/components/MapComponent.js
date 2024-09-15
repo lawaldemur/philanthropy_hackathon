@@ -51,7 +51,7 @@ function MyComponent({filteredPosts}) {
     id: "google-map-script",
     googleMapsApiKey: process.env.REACT_APP_GOOGLE_MAPS_API_KEY, // Use the environment variable
   });
-
+  console.log("Filtered Posts:", filteredPosts);
   const [activeMarker, setActiveMarker] = useState(null);
 
   const locations = useMemo(() => [
