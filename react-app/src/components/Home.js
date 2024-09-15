@@ -47,7 +47,6 @@ function Home() {
 
         const response = await fetch(url, { headers });
         const data = await response.json();
-        console.log(`data: ${data}`);
 
         for (let post of data) {
           try {
