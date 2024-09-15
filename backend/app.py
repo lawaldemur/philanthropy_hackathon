@@ -268,28 +268,33 @@ def protected_route(payload):
     current_user = payload['sub']  # Auth0 user ID
     return jsonify(logged_in_as=current_user), 200
 
-@app.route("/upload_profile_picture", methods=["POST"])
-@jwt_required()
-def upload_profile_picture():
-    user_id = get_jwt_identity()
-    
+@app.route("/upload_file", methods=["POST"])
+def upload_file():
     if 'file' not in request.files:
         return jsonify({"error": "No file uploaded"}), 400
 
     file = request.files['file']
-    file_name = f"user_{user_id}_{file.filename}"
+    
+    if file.filename == '':
+        return jsonify({"error": "No file selected"}), 400
+    
+    if file:
+        filename = file.filename
+        file_path = os.path.join('profile_pics', filename)  # Specify the desired file path in S3
 
-    try:
-        s3.upload_fileobj(file, S3_BUCKET, file_name, ExtraArgs={'ACL': 'public-read', 'ContentType': file.content_type})
-        image_url = f"https://{S3_BUCKET}.s3.amazonaws.com/{file_name}"
+        try:
+            s3.upload_fileobj(file, S3_BUCKET, file_path, ExtraArgs={'ACL': 'public-read', 'ContentType': file.content_type})
+            file_url = f"https://{S3_BUCKET}.s3.amazonaws.com/{file_path}"
+            
+            return jsonify({"file_url": file_url}), 200
+
+        except NoCredentialsError:
+            return jsonify({"error": "AWS credentials not available"}), 500
         
-        # Update the user's profile picture URL in the database
-        db.users.update_one({"id": int(user_id)}, {"$set": {"profile_picture": image_url}})
-
-        return jsonify({"image_url": image_url}), 200
-
-    except NoCredentialsError:
-        return jsonify({"error": "AWS credentials not available"}), 500
+        except Exception as e:
+            return jsonify({"error": str(e)}), 500
+    
+    return jsonify({"error": "Invalid file"}), 400
 
 @app.route("/update_profile/<auth0_sub>", methods=["PUT"])
 def update_profile(auth0_sub):    

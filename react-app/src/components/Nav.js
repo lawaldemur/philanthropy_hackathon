@@ -48,19 +48,7 @@ function Nav() {
             <div className="flex items-center">
               <div className="w-10 h-10 bg-yellow-500 rounded-full flex justify-center items-center">
                 <Link to="/profile">
-                  <svg
-                    width="24"
-                    height="24"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    className="text-brown"
-                  >
-                    <circle cx="12" cy="8" r="4" fill="currentColor"></circle>
-                    <path
-                      d="M21 21C21 25.4183 18.4183 29 12 29C5.58172 29 3 25.4183 3 21C3 16.5817 5.58172 13 12 13C18.4183 13 21 16.5817 21 21Z"
-                      fill="currentColor"
-                    ></path>
-                  </svg>
+                  <img className="w-10 h-10 rounded-full" src={"https://philanthropyhackathon.s3.amazonaws.com/profile_pics/1.jpeg"} />
                 </Link>
               </div>
               <button

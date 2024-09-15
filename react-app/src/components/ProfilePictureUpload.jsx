@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 
-function ProfilePictureUpload({ onUpload }) {
+function FileUpload({ onUpload }) {
   const [selectedFile, setSelectedFile] = useState(null);
 
   const handleFileChange = (event) => {
@@ -15,14 +15,17 @@ function ProfilePictureUpload({ onUpload }) {
     formData.append('file', selectedFile);
 
     try {
-      const response = await axios.post('/upload_profile_picture', formData, {
-        headers: { 'Content-Type': 'multipart/form-data' }
+      const response = await axios.post('/upload_file', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
       });
       
-      const imageUrl = response.data.image_url;
-      onUpload(imageUrl);
+      const fileUrl = response.data.file_url;
+      onUpload(fileUrl);
     } catch (error) {
-      console.log('Error uploading image:', error);
+      console.log('Error uploading file:', error.response.data.error);
+      // Display an error message to the user or handle the error as needed
     }
   };
 
@@ -30,7 +33,6 @@ function ProfilePictureUpload({ onUpload }) {
     <div className="flex items-center space-x-4">
       <input
         type="file"
-        accept="image/*"
         onChange={handleFileChange}
         className="px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
       />
@@ -44,4 +46,4 @@ function ProfilePictureUpload({ onUpload }) {
   );
 }
 
-export default ProfilePictureUpload;
+export default FileUpload;
