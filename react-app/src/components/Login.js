@@ -39,7 +39,7 @@ const LoginButton = () => {
   if (isLoggedIn) {
     return (
       <div>
-        <h2>Welcome, {userData.name}!</h2>
+        <h2>Welcome, {userData.first_name}!</h2>
         <button onClick={handleLogout}>Logout</button>
       </div>
     );

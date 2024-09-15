@@ -116,12 +116,12 @@ def callback_handling():
 
 @app.route('/api/user-data')
 def user_data():
-    if 'profile' in session:
-        user_id = session['profile']['user_id']
-        user = db.users.find_one({'user_id': user_id})
+    if 'jwt_payload' in session:
+        user_email = session['jwt_payload']['email']
+        user = db.users.find_one({'email': user_email})
         if user:
             return jsonify({
-                'name': user['name'],
+                'first_name': user['first_name'],
                 'email': user['email'],
             })
     return jsonify({'error': 'User not found'}), 404
@@ -408,7 +408,6 @@ def create_post(auth0_sub):
         "message": "Volunteering post created successfully.",
         "post": new_post
     }), 201
-
 
 # Serving React App
 @app.route('/', defaults={"path": ""})
