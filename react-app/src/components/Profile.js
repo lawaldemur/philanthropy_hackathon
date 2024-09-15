@@ -1,6 +1,5 @@
 // ./react-app/src/components/Profile.js
 import React, { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
 import Nav from "./Nav";
 import { useAuth0 } from '@auth0/auth0-react';
 import Modal from 'react-modal';
@@ -23,15 +22,17 @@ function Profile() {
     requirements: ''
   });
   const [categories, setCategories] = useState([]);
+  // eslint-disable-next-line
   const auth0_sub = user.sub;
 
   // Fetch user profile from backend
+
   useEffect(() => {
     const fetchProfile = async () => {
       if (isAuthenticated) {
         try {
           const token = await getAccessTokenSilently();
-          const response = await fetch(`http://localhost:8000/get_user/${auth0_sub}`, {
+          const response = await fetch(`http://localhost:8000/get_user/${user.sub}`, {
             headers: {
               'Authorization': `Bearer ${token}`
             }
@@ -50,9 +51,10 @@ function Profile() {
     };
 
     fetchProfile();
-  }, [isAuthenticated, user, getAccessTokenSilently]);
-
+    // We don't include `auth0_sub` because it's static, but still include `isAuthenticated` and other dynamic dependencies
+  }, [isAuthenticated, getAccessTokenSilently, user]);
   // Fetch categories for post creation
+
   useEffect(() => {
     const fetchCategories = async () => {
       try {
@@ -96,8 +98,7 @@ function Profile() {
       });
 
       if (response.ok) {
-        const data = await response.json();
-        setProfile(data.user);
+        // You don't need to assign 'data' if you are not using it
         setIsEditMode(false);
         alert("Profile updated successfully!");
       } else {
@@ -109,6 +110,8 @@ function Profile() {
       alert("An error occurred while updating your profile.");
     }
   };
+
+
 
   // Handle input changes for new post
   const handlePostChange = (e) => {
@@ -143,7 +146,6 @@ function Profile() {
       });
 
       if (response.ok) {
-        const data = await response.json();
         alert("Volunteering post created successfully!");
         setIsModalOpen(false);
         // Optionally, reset the form

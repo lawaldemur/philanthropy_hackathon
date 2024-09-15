@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useCallback, useMemo } from "react";
 import {
   GoogleMap,
   MarkerF,
@@ -7,34 +7,54 @@ import {
 } from "@react-google-maps/api";
 
 const containerStyle = {
-  width: "1000px",
-  height: "400px",
+  width: "100%",
+  height: "100vh",
 };
 
-const center = {
-  lat: -3.745,
-  lng: -38.523,
+const defaultCenter = {
+  lat: 39.8283, // Center of the US
+  lng: -98.5795,
+};
+
+const mapOptions = {
+  styles: [
+    {
+      featureType: "all",
+      elementType: "geometry",
+      stylers: [{ color: "#121212" }], // Dark background
+    },
+    {
+      featureType: "all",
+      elementType: "labels.text",
+      stylers: [{ color: "#e0e0e0" }], // Light text
+    },
+    {
+      featureType: "poi",
+      elementType: "labels.text",
+      stylers: [{ color: "#ffffff" }],
+    },
+    {
+      featureType: "road",
+      elementType: "geometry",
+      stylers: [{ color: "#333333" }],
+    },
+    {
+      featureType: "road",
+      elementType: "labels.text",
+      stylers: [{ color: "#ffffff" }],
+    },
+  ],
 };
 
 function MyComponent(props) {
   const { isLoaded } = useJsApiLoader({
     id: "google-map-script",
-    googleMapsApiKey: "AIzaSyB4IFe1uxmeVr2XIH_mGUT6wezkmAEbZwQ",
+    googleMapsApiKey: process.env.REACT_APP_GOOGLE_MAPS_API_KEY, // Use the environment variable
   });
-  // eslint-disable-next-line
-  const [map, setMap] = React.useState(null);
-  const [selectedLocation, setSelectedLocation] = useState(null);
+
   const [activeMarker, setActiveMarker] = useState(null);
 
-  const onLoad = React.useCallback(function callback(map) {
-    // This is just an example of getting and using the map instance!!! don't just blindly copy!
-    const bounds = new window.google.maps.LatLngBounds(center);
-
-    setMap(map);
-    map.fitBounds(bounds);
-  }, []);
-
-  const locations = [
+  const locations = useMemo(() => [
     {
       id: 1,
       name: "Central Park",
@@ -75,27 +95,30 @@ function MyComponent(props) {
         lng: 86.925026,
       },
     },
-  ];
+  ], []);
 
-  const onUnmount = React.useCallback(function callback(map) {
-    setMap(null);
+  const onLoad = useCallback(function callback(map) {
+    const bounds = new window.google.maps.LatLngBounds();
+    locations.forEach(location => bounds.extend(location.position));
+    map.fitBounds(bounds);
+  }, [locations]);
+
+  const onUnmount = useCallback(function callback(map) {
+    // Clean up logic if needed
   }, []);
 
-  // eslint-disable-next-line
-  const handleMapMarker = (location) => {
-    if (selectedLocation === location) {
-      return;
-    }
-    setSelectedLocation(location);
+  const handleMapMarker = (id) => {
+    setActiveMarker(id);
   };
 
   return isLoaded ? (
     <GoogleMap
       mapContainerStyle={containerStyle}
-      center={locations[0].position}
-      zoom={10}
+      center={defaultCenter}
+      zoom={5}
       onLoad={onLoad}
       onUnmount={onUnmount}
+      options={mapOptions}
     >
       <>
         {locations.map(({ id, name, position }) => (
@@ -103,27 +126,23 @@ function MyComponent(props) {
             key={id}
             position={position}
             onClick={() => handleMapMarker(id)}
-            icon={{
-              url: "https://anysoldier.mbtechconsultants.com/wp-content/uploads/2022/05/icon-donates-06.png",
-              scaledSize: { width: 50, height: 50 },
-            }}
+            
           >
-            {console.log(position)}
-            {activeMarker === id ? (
+            {activeMarker === id && (
               <InfoWindowF onCloseClick={() => setActiveMarker(null)}>
-                <div>
+                <div className="bg-gray-800 text-white p-2 rounded-lg shadow-lg">
                   <p>{name}</p>
                 </div>
               </InfoWindowF>
-            ) : null}
+            )}
           </MarkerF>
         ))}
       </>
     </GoogleMap>
   ) : (
-    <>
-      <h1>Loading...</h1>
-    </>
+    <div className="flex items-center justify-center h-screen bg-gray-900 text-white">
+      Loading...
+    </div>
   );
 }
 

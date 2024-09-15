@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import Modal from "./Modal";
 import Nav from "./Nav";
-import Login from "./Login";
 import { useAuth0 } from "@auth0/auth0-react";
 import ProfilePictureUpload from "./ProfilePictureUpload";
 import MapComponent from "./MapComponent";
@@ -29,7 +28,7 @@ function Home() {
   useEffect(() => {
     const fetchPosts = async () => {
       try {
-        let url = "http://localhost:8000/get_posts";
+        let url = "http://localhost:5000/get_posts";
         let headers = {};
 
         if (isAuthenticated) {
@@ -52,7 +51,7 @@ function Home() {
   useEffect(() => {
     const fetchCategories = async () => {
       try {
-        let url = "http://localhost:8000/get_categories";
+        let url = "http://localhost:5000/get_categories";
         let headers = {};
 
         if (isAuthenticated) {
@@ -82,32 +81,32 @@ function Home() {
 
   return (
     <div className="relative h-screen flex overflow-hidden">
-      {/* Posts Section */}
-      <div className="w-full sm:w-1/2 h-full overflow-y-auto bg-white bg-opacity-90 z-10">
-        <Nav />
-        <ProfilePictureUpload />
-        <header
-          className="w-full container mx-auto"
-          style={{
-            backgroundImage:
-              'url("https://images.unsplash.com/photo-1565803974275-dccd2f933cbb")',
-            backgroundSize: "cover",
-            backgroundRepeat: "no-repeat",
-            backgroundPosition: "center",
-            height: "400px",
-          }}
-        >
-          <div className="flex flex-col items-center py-12">
-            <p className="font-bold text-white uppercase hover:text-gray-700 text-5xl">
-              Volunteer Hub
-            </p>
-            <p className="text-lg text-white">
-              Discover volunteers in your area
-            </p>
-          </div>
-        </header>
 
-        {/* Categories Section */}
+        <div className="w-full sm:w-1/2 h-full overflow-y-auto bg-white bg-opacity-90 z-10">
+          <Nav />
+          <ProfilePictureUpload />
+          <header
+            className="w-full container mx-auto"
+            style={{
+          backgroundImage:
+            'url("https://images.unsplash.com/photo-1565803974275-dccd2f933cbb")',
+          backgroundSize: "cover",
+          backgroundRepeat: "no-repeat",
+          backgroundPosition: "center",
+          height: "400px",
+            }}
+          >
+            <div className="flex flex-col items-center py-12">
+            <p className="font-black text-white uppercase text-5xl">
+            Volunteer Hub
+          </p>
+          <p className="text-lg text-white">
+            Discover volunteers in your area
+          </p>
+            </div>
+          </header>
+
+          {/* Categories Section */}
         <nav className="w-full py-4 border-t border-b bg-gray-100">
           <div className="block sm:hidden">
             <button

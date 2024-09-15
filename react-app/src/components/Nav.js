@@ -56,6 +56,7 @@ function Nav() {
                     src={
                       "https://philanthropyhackathon.s3.amazonaws.com/profile_pics/1.jpeg"
                     }
+                    alt="User profile"
                   />
                 </Link>
               </div>
