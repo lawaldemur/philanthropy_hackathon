@@ -3,6 +3,8 @@ import Modal from "./Modal";
 import Nav from "./Nav";
 import { useAuth0 } from "@auth0/auth0-react";
 import ProfilePictureUpload from './ProfilePictureUpload';
+import MapComponent from "./MapComponent";
+
 
 function Home() {
   const [open, setOpen] = useState(false);
@@ -16,14 +18,9 @@ function Home() {
 
   // Handle category click
   const handleCategoryClick = (categoryId) => {
-    if (selectedCategoryId === categoryId) {
-      // If the clicked category is already selected, reset the selection
-      setSelectedCategoryId(null);
-    } else {
-      // Set the clicked category as the selected category
-      setSelectedCategoryId(categoryId);
-    }
-
+    setSelectedCategoryId(
+      selectedCategoryId === categoryId ? null : categoryId
+    );
   };
 
   const filteredPosts = selectedCategoryId
@@ -33,7 +30,7 @@ function Home() {
   useEffect(() => {
     const fetchPosts = async () => {
       try {
-        let url = "http://localhost:8000/get_posts";
+        let url = "http://localhost:5000/get_posts";
         let headers = {};
 
         if (isAuthenticated) {
@@ -55,7 +52,7 @@ function Home() {
   useEffect(() => {
     const fetchCategories = async () => {
       try {
-        let url = "http://localhost:8000/get_categories";
+        let url = "http://localhost:5000/get_categories";
         let headers = {};
 
         if (isAuthenticated) {
@@ -67,7 +64,7 @@ function Home() {
         const data = await response.json();
         setCategories(data);
       } catch (error) {
-        console.error("Error fetching posts:", error);
+        console.error("Error fetching categories:", error);
       }
     };
 
@@ -89,11 +86,8 @@ function Home() {
       <ProfilePictureUpload />
       <header className="w-full container mx-auto">
         <div className="flex flex-col items-center py-12">
-          <p
-            className="font-bold text-gray-800 uppercase hover:text-gray-700 text-5xl"
-          >
+          <p className="font-bold text-gray-800 uppercase hover:text-gray-700 text-5xl">
             Volunteer Hub
-
           </p>
           <p className="text-lg text-gray-600">Discover volunteers in your area</p>
         </div>
@@ -101,76 +95,31 @@ function Home() {
 
       <div className="flex flex-col sm:flex-row container mx-auto py-6">
         <div className="w-full sm:w-3/4 flex flex-wrap py-6">
-        {filteredPosts.map((
-          post) => {
-        const category = categories.find(category => category["_id"] === post["category_id"]);
+          {filteredPosts.map((post, index) => {
+            const category = categories.find(category => category["_id"] === post["category_id"]);
 
-        return (
-          <section className="w-full flex flex-col items-center px-3 post-section-wrapper" key={post.id}>
-            <div className="flex flex-col justify-between w-full sm:w-2/3 pl-4">
-              {/* Job Title and Company */}
-            </div>
-
-            {/* Article */}
-            <article className="flex flex-col shadow my-4" onClick={() => openModal(post)} style={{ width: '100%' }}>
-              <div className="bg-white flex flex-col justify-start p-6">
-                <a href="#" className="text-blue-700 text-sm font-bold uppercase pb-4">
-                  {category ? category.name : "Category not found"}
-                </a>
-                <a href="#" className="text-3xl font-bold hover:text-gray-700 pb-4">
-                  {post.title}
-                </a>
-                <p className="text-sm pb-3">
-                  By{" "}
-                  <a href="#" className="font-semibold hover:text-gray-800">
-                    {post.author_first_name} {post.author_last_name}
-                  </a>
-                </p>
-                <p>{post.description}</p>
-                <div>
-                  <p className="text-blue-700 font-bold">$46.06 / hr</p>
-                  <p className="text-gray-600 text-sm">
-                    Financial District · 100 Gold St · New York
-                  </p>
-                </div>
-                <div className="flex justify-between items-center mt-4">
-                  {/* Badges */}
-                  <div className="flex space-x-2">
-                    <span className="bg-blue-500 text-white text-xs px-2 py-1 rounded-full">
-                      Full-time
-                    </span>
-                    <span className="bg-gray-500 text-white text-xs px-2 py-1 rounded-full">
-                      Government
-                    </span>
-                    <span className="bg-green-500 text-white text-xs px-2 py-1 rounded-full">
-                      7 days ago
-                    </span>
-                  </div>
-                </div>
-
-                {/* Article */}
+            return (
+              <section
+                className="w-full flex flex-col items-center px-3 post-section-wrapper"
+                key={post.id || index}
+              >
                 <article
                   className="flex flex-col shadow my-4"
                   onClick={() => openModal(post)}
+                  style={{ width: "100%" }}
                 >
                   <div className="bg-white flex flex-col justify-start p-6">
-                    <a
-                      href="#"
-                      className="text-blue-700 text-sm font-bold uppercase pb-4"
-                    >
+                    <span className="text-blue-700 text-sm font-bold uppercase pb-4">
                       {category ? category.name : "Category not found"}
-                    </a>
-                    <a
-                      href="#"
-                      className="text-3xl font-bold hover:text-gray-700 pb-4"
-                    >
+                    </span>
+                    <span className="text-3xl font-bold hover:text-gray-700 pb-4">
                       {post.title}
-                    </a>
+                    </span>
                     <p className="text-sm pb-3">
                       By{" "}
-                      <a href="#" className="font-semibold hover:text-gray-800">
+                      <span className="font-semibold hover:text-gray-800">
                         {post.author_first_name} {post.author_last_name}
-                      </a>
+                      </span>
                     </p>
                     <p>{post.description}</p>
                     <div>
@@ -180,16 +129,15 @@ function Home() {
                       </p>
                     </div>
                     <div className="flex justify-between items-center mt-4">
-                      {/* Badges */}
                       <div className="flex space-x-2">
                         <span className="bg-blue-500 text-white text-xs px-2 py-1 rounded-full">
-                          button 1
+                          Full-time
                         </span>
                         <span className="bg-gray-500 text-white text-xs px-2 py-1 rounded-full">
-                          button 2
+                          Government
                         </span>
                         <span className="bg-green-500 text-white text-xs px-2 py-1 rounded-full">
-                          button 3
+                          7 days ago
                         </span>
                       </div>
                     </div>
@@ -198,58 +146,57 @@ function Home() {
               </section>
             );
           })}
-          {/* Modal */}
           {isModalOpen && (
-            <Modal
-              selectedPost={selectedPost} // Pass the selected post
-              closeModal={closeModal}
-            />
+            <Modal selectedPost={selectedPost} closeModal={closeModal} />
           )}
         </div>
 
         <nav className="w-full py-4 border-t border-b bg-gray-100">
           <div className="block sm:hidden">
-            <a
-              href="#"
+            <button
               className="block md:hidden text-base font-bold uppercase text-center flex justify-center items-center"
               onClick={() => setOpen(!open)}
             >
               Topics{" "}
               <i
-                className={`fas ml-2 ${
-                  open ? "fa-chevron-down" : "fa-chevron-up"
-                }`}
+                className={`fas ml-2 ${open ? "fa-chevron-down" : "fa-chevron-up"
+                  }`}
               ></i>
-            </a>
+            </button>
           </div>
           <div
-            className={`w-full flex-grow sm:flex sm:items-center sm:w-auto ${
-              open ? "block" : "hidden"
-            }`}
+            className={`w-full flex-grow sm:flex sm:items-center sm:w-auto ${open ? "block" : "hidden"
+              }`}
           >
             <div className="w-full container mx-auto flex flex-col sm:flex-row items-center justify-center text-sm font-bold uppercase mt-0 px-6 py-2">
               {categories.map((category) => (
-                <a
-                  href="#"
-                  className={`hover:bg-gray-400 rounded py-2 px-4 mx-2 ${
-                    selectedCategoryId === category["_id"]
-                      ? "bg-gray-500 text-white"
-                      : ""
-                  }`}
-                  data-id={category["id"]}
+                <button
+                  key={category["_id"]}
+                  className={`hover:bg-gray-400 rounded py-2 px-4 mx-2 ${selectedCategoryId === category["_id"]
+                    ? "bg-gray-500 text-white"
+                    : ""
+                    }`}
                   onClick={() => handleCategoryClick(category["_id"])}
                 >
                   {category["name"]}
-                </a>
+                </button>
               ))}
+
+
             </div>
           </div>
         </nav>
+        <MapComponent />
       </div>
 
       <footer className="w-full border-t bg-white pb-12">
         <div className="w-full container mx-auto flex flex-col items-center">
-          <div className="uppercase pb-6 volunteer_hub_footer" style={{ marginTop: '50px' }}>&copy; Volunteer Hub</div>
+          <div
+            className="uppercase pb-6 volunteer_hub_footer"
+            style={{ marginTop: "50px" }}
+          >
+            &copy; Volunteer Hub
+          </div>
         </div>
       </footer>
     </div>
