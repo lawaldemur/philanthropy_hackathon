@@ -1,11 +1,9 @@
 // ./react-app/src/components/Nav.js
 import React from "react";
 import { Link, useLocation } from "react-router-dom";
-import { useAuth0 } from "@auth0/auth0-react";
 import Login from "./Login";
 
 function Nav() {
-  const { isAuthenticated, logout } = useAuth0();
   const location = useLocation();
 
   return (
@@ -37,17 +35,14 @@ function Nav() {
         </div>
 
         <div className="flex items-center space-x-6 text-lg text-white pr-6">
-          {!isAuthenticated ? (
+           
             <div className="flex gap-3">
-              <Link
-                to="/login"
-                className="bg-white text-blue-800 hover:bg-gray-200 text-sm font-bold py-2 px-4 rounded"
-              >
-                <Login />
-              </Link>
+
+            <Login className="bg-white text-blue-800 hover:bg-gray-200 text-sm font-bold py-2 px-4 rounded" /> 
+              
             </div>
-          ) : (
-            <div className="flex items-center">
+            
+            {/* <div className="flex items-center">
               <div className="w-10 h-10 bg-yellow-500 rounded-full flex justify-center items-center">
                 <Link to="/profile">
                   <Login />
@@ -67,7 +62,7 @@ function Nav() {
                 Log Out
               </button>
             </div>
-          )}
+           */}
         </div>
       </div>
     </nav>
