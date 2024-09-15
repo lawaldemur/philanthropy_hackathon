@@ -2,9 +2,9 @@ import React, { useEffect, useState } from "react";
 import Modal from "./Modal";
 import Nav from "./Nav";
 import Login from "./Login";
-import { useAuth0 } from "@auth0/auth0-react";
 import ProfilePictureUpload from "./ProfilePictureUpload";
 import MapComponent from "./MapComponent";
+import Cookies from 'js-cookie';
 
 function Home() {
   const [open, setOpen] = useState(false);
@@ -14,7 +14,10 @@ function Home() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedPost, setSelectedPost] = useState(null);
 
-  const { getAccessTokenSilently, isAuthenticated } = useAuth0();
+  const isSessionSet = () => {
+    return Cookies.get('jwt_payload') !== undefined;
+  };
+  const isAuthenticated = isSessionSet();
 
   const handleCategoryClick = (categoryId) => {
     setSelectedCategoryId(
@@ -32,11 +35,6 @@ function Home() {
         let url = "http://localhost:8000/get_posts";
         let headers = {};
 
-        if (isAuthenticated) {
-          const token = await getAccessTokenSilently();
-          headers.Authorization = `Bearer ${token}`;
-        }
-
         const response = await fetch(url, { headers });
         const data = await response.json();
         console.log(`data: ${data}`);
@@ -47,18 +45,13 @@ function Home() {
     };
 
     fetchPosts();
-  }, [getAccessTokenSilently, isAuthenticated]);
+  }, [isAuthenticated]);
 
   useEffect(() => {
     const fetchCategories = async () => {
       try {
         let url = "http://localhost:8000/get_categories";
         let headers = {};
-
-        if (isAuthenticated) {
-          const token = await getAccessTokenSilently();
-          headers.Authorization = `Bearer ${token}`;
-        }
 
         const response = await fetch(url, { headers });
         const data = await response.json();
@@ -69,7 +62,7 @@ function Home() {
     };
 
     fetchCategories();
-  }, [getAccessTokenSilently, isAuthenticated]);
+  }, [isAuthenticated]);
 
   const openModal = (post) => {
     setSelectedPost(post);
@@ -150,8 +143,7 @@ function Home() {
             const category = categories.find(
               (category) => category["_id"] === post["category_id"]
             );
-            // console.log(post);
-            // console.log("HELLO");
+
             return (
               <section
                 className="w-full flex flex-col items-center px-3 post-section-wrapper"

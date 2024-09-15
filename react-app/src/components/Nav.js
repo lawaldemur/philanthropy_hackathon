@@ -3,10 +3,15 @@ import React from "react";
 import { Link, useLocation } from "react-router-dom";
 import { useAuth0 } from "@auth0/auth0-react";
 import Login from "./Login";
+import Cookies from 'js-cookie';
 
 function Nav() {
-  const { isAuthenticated, logout } = useAuth0();
   const location = useLocation();
+
+  const isSessionSet = () => {
+    return Cookies.get('jwt_payload') !== undefined;
+  };
+  const isAuthenticated = isSessionSet();
 
   return (
     <nav className="w-full py-4 bg-blue-800 shadow">
@@ -50,7 +55,6 @@ function Nav() {
             <div className="flex items-center">
               <div className="w-10 h-10 bg-yellow-500 rounded-full flex justify-center items-center">
                 <Link to="/profile">
-                  <Login />
                   <img
                     className="w-10 h-10 rounded-full"
                     src={
@@ -60,7 +64,7 @@ function Nav() {
                 </Link>
               </div>
               <button
-                onClick={() => logout({ returnTo: window.location.origin })}
+                // onClick={() => logout({ returnTo: window.location.origin })}
                 className="ml-4 bg-red-600 text-white px-3 py-1 rounded"
               >
                 Log Out
