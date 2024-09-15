@@ -30,7 +30,8 @@ const LoginButton = () => {
   const handleLogout = async () => {
     try {
       const response = await axios.get('/api/logout');
-      window.location.href = response.data.logout_url;
+      //TO FIX  IN THE FUTURE
+      window.location.href = '/';
     } catch (error) {
       console.error('Error during logout:', error);
     }

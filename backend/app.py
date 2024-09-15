@@ -129,9 +129,7 @@ def user_data():
 @app.route('/api/logout')
 def logout():
     session.clear()
-    params = {'returnTo': 'http://localhost:8000', 'client_id': os.environ.get('GOOGLE_CLIENT_ID')}
-    return jsonify({'logout_url': auth0.api_base_url + '/v2/logout?' + urlencode(params)}), 200
-
+    return redirect("/index")
 def find_user_by_id(user_id):
     """
     Retrieves a user from the database by their integer ID.
