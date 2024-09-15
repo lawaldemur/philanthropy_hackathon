@@ -46,7 +46,7 @@ const mapOptions = {
   ],
 };
 
-function MyComponent({filteredPosts}) {
+function MyComponent({ filteredPosts }) {
   const { isLoaded } = useJsApiLoader({
     id: "google-map-script",
     googleMapsApiKey: process.env.REACT_APP_GOOGLE_MAPS_API_KEY, // Use the environment variable
@@ -54,54 +54,27 @@ function MyComponent({filteredPosts}) {
   console.log("Filtered Posts:", filteredPosts);
   const [activeMarker, setActiveMarker] = useState(null);
 
-  const locations = useMemo(() => [
-    {
-      id: 1,
-      name: "Central Park",
-      position: {
-        lat: 40.785091,
-        lng: -73.968285,
-      },
-    },
-    {
-      id: 2,
-      name: "Golden Gate Bridge",
-      position: {
-        lat: 37.819929,
-        lng: -122.478255,
-      },
-    },
-    {
-      id: 3,
-      name: "Eiffel Tower",
-      position: {
-        lat: 48.858844,
-        lng: 2.294351,
-      },
-    },
-    {
-      id: 4,
-      name: "Sydney Opera House",
-      position: {
-        lat: -33.856784,
-        lng: 151.215297,
-      },
-    },
-    {
-      id: 5,
-      name: "Mount Everest",
-      position: {
-        lat: 27.988121,
-        lng: 86.925026,
-      },
-    },
-  ], []);
+  const locations = useMemo(
+    () =>
+      filteredPosts.map((post) => ({
+        id: post.id,
+        name: post.location,
+        position: {
+          lat: post.lat,
+          lng: post.lng,
+        },
+      })),
+    [filteredPosts]
+  );
 
-  const onLoad = useCallback(function callback(map) {
-    const bounds = new window.google.maps.LatLngBounds();
-    locations.forEach(location => bounds.extend(location.position));
-    map.fitBounds(bounds);
-  }, [locations]);
+  const onLoad = useCallback(
+    function callback(map) {
+      const bounds = new window.google.maps.LatLngBounds();
+      locations.forEach((location) => bounds.extend(location.position));
+      map.fitBounds(bounds);
+    },
+    [locations]
+  );
 
   const onUnmount = useCallback(function callback(map) {
     // Clean up logic if needed
@@ -126,7 +99,6 @@ function MyComponent({filteredPosts}) {
             key={id}
             position={position}
             onClick={() => handleMapMarker(id)}
-            
           >
             {activeMarker === id && (
               <InfoWindowF onCloseClick={() => setActiveMarker(null)}>
