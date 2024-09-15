@@ -91,7 +91,7 @@ function Home() {
     <div className="relative flex flex-col min-h-screen">
       <div className="bg-white bg-opacity-90">
         <Nav isLoggedIn={isLoggedIn} userData={userData} />
-        <ProfilePictureUpload userData={userData} />
+        
         <header
           className="w-full container mx-auto"
           style={{

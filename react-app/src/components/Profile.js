@@ -4,6 +4,7 @@ import React, { useEffect, useState } from "react";
 import Nav from "./Nav";
 import Modal from "react-modal";
 import axios from "axios";
+import ProfilePictureUpload from "./ProfilePictureUpload";
 
 // Set the app element for accessibility
 Modal.setAppElement("#root");
@@ -12,6 +13,12 @@ function Profile() {
   const [profile, setProfile] = useState(null);
   const [isEditMode, setIsEditMode] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [categories, setCategories] = useState([]);
+  const [userData, setUserData] = useState(null);
+  const [posts, setPosts] = useState([]);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [selectedPost, setSelectedPost] = useState(null);
+
   const [postData, setPostData] = useState({
     title: "",
     description: "",
@@ -20,11 +27,7 @@ function Profile() {
     location: "",
     requirements: "",
   });
-  const [categories, setCategories] = useState([]);
-  const [userData, setUserData] = useState(null);
-  const [posts, setPosts] = useState([]);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [selectedPost, setSelectedPost] = useState(null);
+  
 
   // Fetch user data on component mount
   useEffect(() => {
@@ -38,20 +41,20 @@ function Profile() {
         console.log("User Response:", userResponse.data);
 
         setUserData(userResponse.data);
-        setIsAuthenticated(true);
+        setIsLoggedIn(true);
       } catch (error) {
         console.error("Error fetching user data:", error);
-        setIsAuthenticated(false);
+        setIsLoggedIn(false);
       }
     };
 
     fetchUserData();
   }, []);
 
-  // Fetch profile whenever userData or isAuthenticated changes
+  // Fetch profile whenever userData or isLoggedIn changes
   useEffect(() => {
     const fetchProfile = async () => {
-      if (isAuthenticated && userData && userData.email) {
+      if (isLoggedIn && userData && userData.email) {
         try {
           const response = await axios.get(
             `/find_user_by_email/${userData.email}`
@@ -64,7 +67,7 @@ function Profile() {
     };
 
     fetchProfile();
-  }, [isAuthenticated, userData]);
+  }, [isLoggedIn, userData]);
 
   // Fetch categories on component mount
   useEffect(() => {
@@ -103,7 +106,7 @@ function Profile() {
     };
 
     fetchPosts();
-  }, [isAuthenticated, userData]);
+  }, [isLoggedIn, userData]);
 
   // Handle input changes for profile editing
   const handleProfileChange = (e) => {
@@ -195,7 +198,7 @@ function Profile() {
   };
 
 
-  if (!isAuthenticated) {
+  if (!isLoggedIn) {
     return (
       <div className="flex justify-center items-center h-screen">
         <p>Loading...</p>
@@ -213,15 +216,15 @@ function Profile() {
 
   return (
     <main className="app">
-      <Nav />
+      <Nav isLoggedIn={isLoggedIn} userData={userData}/>
       {/* Profile Content */}
       <div className="bg-white flex flex-col w-full p-6">
         {/* Banner Image */}
         <div className="relative h-40 w-full mb-4">
           <img
             src={
-              profile.avatar_url ||
-              "https://static.bandana.co/users/profile/default/default.jpg"
+              "https://philanthropyhackathon.s3.amazonaws.com/profile_pics/" +
+              userData.profile_pic_filename
             }
             alt="Profile Banner"
             className="object-cover w-full h-full"
@@ -235,8 +238,8 @@ function Profile() {
             <div className="relative w-32 h-32 rounded-full overflow-hidden mb-4">
               <img
                 src={
-                  profile.avatar_url ||
-                  "https://static.bandana.co/users/profile/default/default.jpg"
+                  "https://philanthropyhackathon.s3.amazonaws.com/profile_pics/" +
+                  userData.profile_pic_filename
                 }
                 alt="Profile Avatar"
                 className="w-full h-full object-cover"
@@ -308,16 +311,10 @@ function Profile() {
                     />
                   </div>
                   <div className="mb-2">
-                    <label className="block text-sm font-medium text-gray-700">
-                      Avatar URL
+                  <label className="block text-sm font-medium text-gray-700">
+                      Profile Picture
                     </label>
-                    <input
-                      type="text"
-                      name="avatar_url"
-                      value={profile.avatar_url || ""}
-                      onChange={handleProfileChange}
-                      className="mt-1 block w-full border-gray-300 rounded-md shadow-sm"
-                    />
+                  <ProfilePictureUpload userData={userData} />
                   </div>
                   <div className="mb-4">
                     <label className="block text-sm font-medium text-gray-700">
